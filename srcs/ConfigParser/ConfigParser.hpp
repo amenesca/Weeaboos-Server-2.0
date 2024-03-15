@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:23 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/14 17:27:10 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/15 16:31:29 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 # include "../VirtualServer/VirtualServer.hpp"
 # include <fstream>
 # include <sstream>
+# include <cstdlib>
 
 class ConfigParser
 {
@@ -36,8 +37,18 @@ class ConfigParser
 		void	setConfigFilePath(const std::string& configFilePath);
 		void	setVServers(const std::vector<VirtualServer>& vServers);
 
-		int	initConfig(void);
-		void openConfig(void);
+		std::vector<std::string>	split(const std::string& input) const;
+		std::vector<int>			StrVecToIntVecPort(const std::vector<std::string>& strVector) const;
+		in_addr_t					treatHost(std::string buff) const;
+		bool						isHostValid(std::string & _parameter) const;
+		int							atoi(const std::string line) const;
+		int							treatMaxBodySize(const std::string& strMaxBodySize) const;
+
+		void	openConfig(void);
+		int		initConfig(void);
+		void	createVServers(void);
+		void	configVServer(VirtualServer* vServer);
+		
 
 		class OpenError : public std::exception {
 			public:
@@ -45,6 +56,11 @@ class ConfigParser
 		};
 
 		class InvalidSyntax : public std::exception {
+			public:
+				virtual const char* what() const throw();
+		};
+
+		class InvalidArguments : public std::exception {
 			public:
 				virtual const char* what() const throw();
 		};
