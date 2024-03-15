@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/14 16:49:09 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/15 17:28:44 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,6 +106,12 @@ std::vector<Location> VirtualServer::getLocations(void) const
 {
 	return this->_locations;
 }
+
+std::vector<Location>*	VirtualServer::getLocationsAddress(void)
+{
+	return &this->_locations;
+}
+
 
 void	VirtualServer::setServerDefault(const bool& serverDefault)
 {

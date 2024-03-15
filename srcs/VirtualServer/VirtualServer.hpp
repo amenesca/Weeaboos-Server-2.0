@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:16 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/14 17:00:33 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/15 17:27:59 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class VirtualServer
 		int							getMaxBodySize(void) const;
 		std::vector<std::string>	getErrorPage(void) const;
 		std::vector<Location>		getLocations(void) const;
+		std::vector<Location>*		getLocationsAddress(void);
 
 		void	setServerDefault(const bool& serverDefault);
 		void	setPort(const std::vector<int>& port);

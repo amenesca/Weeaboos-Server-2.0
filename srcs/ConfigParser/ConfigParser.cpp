@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 16:56:28 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/15 17:30:11 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,6 +202,8 @@ in_addr_t	ConfigParser::treatHost(std::string buff) const
 	{
 		return inet_addr(buff.c_str());
 	}
+	throw InvalidArguments();
+	return (INADDR_NONE);
 }
 
 int	ConfigParser::treatMaxBodySize(const std::string& strMaxBodySize) const
@@ -218,6 +220,71 @@ int	ConfigParser::treatMaxBodySize(const std::string& strMaxBodySize) const
 	}
 	
 	return (intValue);
+}
+
+bool ConfigParser::treatAutoIndex(const std::string& _argument) const
+{
+	if (_argument == "true")
+	{
+		return true;
+	}
+	else if (_argument == "false")
+	{
+		return false;
+	}
+	else
+	{
+		throw InvalidArguments();
+	}
+	return false;
+}
+
+void ConfigParser::treatLocation(VirtualServer* currentServer, std::string locationPath)
+{
+	std::string buff;
+	Location locationInstance;
+	locationInstance.setPath(locationPath);
+	bool rightBrace = false;
+
+	while (std::getline(this->_configFileStream >> std::ws, buff))
+	{
+		if (buff.find("cgi_extension", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos)
+		{
+			locationInstance.setCgiExtension(split(buff)[1]);
+		}
+		else if (buff.find("upload", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos) {
+			locationInstance.setUpload(split(buff)[1]);
+		}
+		else if (buff.find("index", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos) {
+			locationInstance.setIndex(split(buff));
+		}
+		else if (buff.find("autoindex", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos) {
+			locationInstance.setAutoIndex(treatAutoIndex(split(buff)[1]));
+		}
+		else if (buff.find("methods", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos) {
+			locationInstance.setMethods(split(buff));
+		}
+		else if (buff.find("return", 0) != std::string::npos && \
+		buff.find("}") == std::string::npos) {
+			locationInstance.setReturn(split(buff)[1]);
+		}
+		else if (buff.find("}", 0) != std::string::npos) {
+			rightBrace = true;
+			break;
+		}
+		else {
+			throw InvalidSyntax();
+		}
+	}
+	if (rightBrace == false) {
+			throw InvalidSyntax();
+	}
+	currentServer->getLocationsAddress()->push_back(locationInstance);
 }
 
 void ConfigParser::configVServer(VirtualServer* currentServer)

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:23 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 16:31:29 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/15 17:24:51 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ class ConfigParser
 		bool						isHostValid(std::string & _parameter) const;
 		int							atoi(const std::string line) const;
 		int							treatMaxBodySize(const std::string& strMaxBodySize) const;
+		void 						treatLocation(VirtualServer* currentServer, std::string locationPath);
+		bool						treatAutoIndex(const std::string& _argument) const;
 
 		void	openConfig(void);
 		int		initConfig(void);
