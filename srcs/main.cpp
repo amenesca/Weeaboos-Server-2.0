@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:13 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/14 17:13:13 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/18 13:57:46 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,9 @@
 
 int main(int argc, char **argv)
 {
-	ConfigParser	settingVServers;
-	std::string		configFilePath;
+	ConfigParser				settingVServers;
+	std::string					configFilePath;
+//	std::vector<VirtualServer>	vServers; // agora usar essa classe para criar as conexões
 	
 	try {
 		if (argc == 2)

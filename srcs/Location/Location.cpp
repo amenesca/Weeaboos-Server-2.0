@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 15:16:28 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 17:20:47 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/18 13:57:26 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,9 @@ Location& Location::operator=(const Location& src)
 		this->_methods = src.getMethods();
 		this->_index = src.getIndex();
 		this->_autoIndex = src.getAutoIndex();
+		this->_cgi_extension = src.getCgiExtension();
+		this->_upload = src.getUpload();
+		this->_return = src.getReturn();
 	}
 	return *this;
 }
