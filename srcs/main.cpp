@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:13 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/18 14:04:33 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/19 17:24:46 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,12 @@ int main(int argc, char **argv)
 			std::cerr << "webserver: error: Invalid arguments." << std::endl;
 			return -1;	
 		}
+		
+		for (size_t i = 0; i < vServers.size(); i++)
+		{
+			vServers[i].initialize();
+		}
+		
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
 		return -1;

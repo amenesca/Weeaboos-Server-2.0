@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 17:28:44 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/19 17:23:39 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,9 @@ VirtualServer::VirtualServer(void) :
 	_index(),
 	_maxBodySize(0),
 	_errorPage(),
-	_locations()
+	_locations(),
+	_fd_socket(-1),
+	_main_port(0)
 {
 	
 }
@@ -37,6 +39,8 @@ VirtualServer::~VirtualServer(void)
 	_maxBodySize = 0;
 	_errorPage.clear();
 	_locations.clear();
+	_fd_socket = -1;
+	_main_port = 0;
 }
 
 VirtualServer& VirtualServer::operator=(const VirtualServer& src)
@@ -52,6 +56,8 @@ VirtualServer& VirtualServer::operator=(const VirtualServer& src)
 		this->_maxBodySize = src.getMaxBodySize();
 		this->_errorPage = src.getErrorPage();
 		this->_locations = src.getLocations();
+		this->_fd_socket = src.getFdSocket();
+		this->_main_port = src.getMainPort();
 	}
 	return *this;
 }
@@ -107,6 +113,16 @@ std::vector<Location> VirtualServer::getLocations(void) const
 	return this->_locations;
 }
 
+int	VirtualServer::getFdSocket(void) const
+{
+	return this->_fd_socket;
+}
+
+int VirtualServer::getMainPort(void) const
+{
+	return this->_main_port;
+}
+
 std::vector<Location>*	VirtualServer::getLocationsAddress(void)
 {
 	return &this->_locations;
@@ -156,4 +172,85 @@ void	VirtualServer::setErrorPage(const std::vector<std::string>& errorPage)
 void	VirtualServer::setLocations(const std::vector<Location>& locations)
 {
 	this->_locations = locations;
+}
+
+void	VirtualServer::setFdSocket(const int& fd_socket)
+{
+	this->_fd_socket = fd_socket;
+}
+
+void	VirtualServer::setMainPort(const int& main_port)
+{
+	this->_main_port = main_port;
+}
+
+void	VirtualServer::initialize(void)
+{
+	struct sockaddr_in	server_addr;
+	socklen_t			server_addr_len;
+	int					opt;
+
+	opt = 1;
+	this->_main_port = _port[0];
+	this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	if (this->_fd_socket == -1)
+	{
+		throw SocketError();
+	}
+	setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
+		&opt, sizeof(int));
+
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(this->_main_port);
+	server_addr.sin_addr.s_addr = this->getHost();
+
+	server_addr_len = sizeof(server_addr);
+
+	if (bind(this->_fd_socket, \
+		reinterpret_cast<struct sockaddr*>(&server_addr), \
+		sizeof(server_addr_len)) == -1)
+	{
+		throw BindError();
+	}
+
+	if (listen(this->_fd_socket, 1024) == -1)
+	{
+		throw ListenError();
+	}
+
+	return ;
+}
+
+int						VirtualServer::acceptCon(void) const
+{
+	struct sockaddr_in	client_address;
+	socklen_t			client_address_len;
+	int					client_socket;
+
+	client_address_len = sizeof(client_address);
+	client_socket = accept(this->_fd_socket, \
+		reinterpret_cast<struct sockaddr*>(&client_address), \
+		&client_address_len);
+	return (client_socket);
+}
+
+void					VirtualServer::closeCon(void)
+{
+	if (this->_fd_socket >= 0)
+	{
+		close(this->_fd_socket);
+		this->_fd_socket = -1;
+	}
+}
+
+const char *VirtualServer::SocketError::what() const throw() {
+	return ("webserver: error: can't create a new socket.");
+}
+
+const char *VirtualServer::BindError::what() const throw() {
+	return ("webserver: error: can't bind address to socket.");
+}
+
+const char *VirtualServer::ListenError::what() const throw() {
+	return ("webserver: error: can't listen to connections on socket.");
 }

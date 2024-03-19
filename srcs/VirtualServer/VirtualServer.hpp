@@ -6,13 +6,14 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:16 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 17:27:59 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/19 17:24:18 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 # include <arpa/inet.h>
+# include <unistd.h>
 
 # include "../Location/Location.hpp"
 
@@ -29,6 +30,9 @@ class VirtualServer
 		std::vector<std::string>	_errorPage;
 		std::vector<Location>		_locations;
 
+		int		_fd_socket;
+		int		_main_port;
+
 	public:
 		VirtualServer(void);
 		~VirtualServer(void);
@@ -44,6 +48,8 @@ class VirtualServer
 		int							getMaxBodySize(void) const;
 		std::vector<std::string>	getErrorPage(void) const;
 		std::vector<Location>		getLocations(void) const;
+		int							getFdSocket(void) const;
+		int							getMainPort(void) const;
 		std::vector<Location>*		getLocationsAddress(void);
 
 		void	setServerDefault(const bool& serverDefault);
@@ -55,4 +61,26 @@ class VirtualServer
 		void	setMaxBodySize(const int& maxBodySize);
 		void	setErrorPage(const std::vector<std::string>& errorPage);
 		void	setLocations(const std::vector<Location>& locations);
+		void	setFdSocket(const int& fd_socket);
+		void	setMainPort(const int& main_port);
+
+		void	initialize(void);
+		int		acceptCon(void) const;
+		void	closeCon(void);
+
+
+		class SocketError : public std::exception {
+			public:
+				virtual const char* what() const throw();
+		};
+
+		class BindError : public std::exception {
+			public:
+				virtual const char* what() const throw();
+		};
+
+		class ListenError : public std::exception {
+			public:
+				virtual const char* what() const throw();
+		};
 };
