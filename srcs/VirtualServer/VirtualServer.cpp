@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 11:18:00 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 11:31:05 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,7 +216,6 @@ void	VirtualServer::initialize(void)
 		reinterpret_cast<struct sockaddr*>(&server_addr), \
 		server_addr_len) == -1)
 	{
-		std::cerr << "Erro ao vincular o socket: " << strerror(errno) << std::endl;
 		throw BindError();
 	}
 
