@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:13 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 10:59:04 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 11:59:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 		}
 
 		WebServer Server(vServers);
+		Server.StartServer();
 		
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;
