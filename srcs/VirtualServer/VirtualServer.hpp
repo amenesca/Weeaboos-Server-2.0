@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:16 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/19 17:24:18 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 11:11:51 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,10 @@
 
 # include <arpa/inet.h>
 # include <unistd.h>
+# include <cstdio>
+# include <cstring>
+# include <iostream>
+# include <cerrno>
 
 # include "../Location/Location.hpp"
 
@@ -32,6 +36,8 @@ class VirtualServer
 
 		int		_fd_socket;
 		int		_main_port;
+
+		bool isDescriptorOpen(int fd) const;
 
 	public:
 		VirtualServer(void);
@@ -67,8 +73,7 @@ class VirtualServer
 		void	initialize(void);
 		int		acceptCon(void) const;
 		void	closeCon(void);
-
-
+		
 		class SocketError : public std::exception {
 			public:
 				virtual const char* what() const throw();

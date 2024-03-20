@@ -5,7 +5,8 @@ CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 CLASSES =	srcs/Location/Location.cpp\
 			srcs/VirtualServer/VirtualServer.cpp\
-			srcs/ConfigParser/ConfigParser.cpp
+			srcs/ConfigParser/ConfigParser.cpp\
+			srcs/WebServer/WebServer.cpp
 
 SRCS = $(CLASSES) srcs/main.cpp
 

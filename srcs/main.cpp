@@ -6,24 +6,24 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:13 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/19 17:24:46 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 10:59:04 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "./ConfigParser/ConfigParser.hpp"
 #include <iostream>
+
+#include "./ConfigParser/ConfigParser.hpp"
+#include "./WebServer/WebServer.hpp"
 
 int main(int argc, char **argv)
 {
 	ConfigParser				settingVServers;
-	std::string					configFilePath;
 	std::vector<VirtualServer>	vServers;
-	
+
 	try {
 		if (argc == 2)
 		{
-			configFilePath = argv[1];
-			settingVServers.setConfigFilePath(configFilePath);
+			settingVServers.setConfigFilePath(argv[1]);
 			settingVServers.initConfig();
 			vServers = settingVServers.getVServers(); // VServers Copiados para a main
 			// Agora devo começar a conexão de sockets
@@ -36,11 +36,13 @@ int main(int argc, char **argv)
 			std::cerr << "webserver: error: Invalid arguments." << std::endl;
 			return -1;	
 		}
-		
+
 		for (size_t i = 0; i < vServers.size(); i++)
 		{
 			vServers[i].initialize();
 		}
+
+		WebServer Server(vServers);
 		
 	} catch (const std::exception &e) {
 		std::cerr << e.what() << std::endl;

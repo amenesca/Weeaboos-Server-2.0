@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/19 17:23:39 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 11:18:00 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,10 @@ VirtualServer::~VirtualServer(void)
 	_maxBodySize = 0;
 	_errorPage.clear();
 	_locations.clear();
+	if (isDescriptorOpen(this->_fd_socket))
+	{
+		close(this->_fd_socket);
+	}
 	_fd_socket = -1;
 	_main_port = 0;
 }
@@ -189,10 +193,11 @@ void	VirtualServer::initialize(void)
 	struct sockaddr_in	server_addr;
 	socklen_t			server_addr_len;
 	int					opt;
-
+	
 	opt = 1;
 	this->_main_port = _port[0];
 	this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	
 	if (this->_fd_socket == -1)
 	{
 		throw SocketError();
@@ -200,16 +205,18 @@ void	VirtualServer::initialize(void)
 	setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
 		&opt, sizeof(int));
 
+	std::memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(this->_main_port);
 	server_addr.sin_addr.s_addr = this->getHost();
+	server_addr.sin_port = htons(this->_main_port);
 
 	server_addr_len = sizeof(server_addr);
 
 	if (bind(this->_fd_socket, \
 		reinterpret_cast<struct sockaddr*>(&server_addr), \
-		sizeof(server_addr_len)) == -1)
+		server_addr_len) == -1)
 	{
+		std::cerr << "Erro ao vincular o socket: " << strerror(errno) << std::endl;
 		throw BindError();
 	}
 
@@ -241,6 +248,19 @@ void					VirtualServer::closeCon(void)
 		close(this->_fd_socket);
 		this->_fd_socket = -1;
 	}
+}
+
+bool VirtualServer::isDescriptorOpen(int fd) const {
+    // Tenta associar um fluxo de arquivo ao descritor de arquivo fornecido
+    FILE *file = fdopen(fd, "r");
+    if (file) {
+        // Se a associação for bem-sucedida, o descritor de arquivo está aberto
+        fclose(file);
+        return true;
+    } else {
+        // Se a associação falhar, o descritor de arquivo não está aberto
+        return false;
+    }
 }
 
 const char *VirtualServer::SocketError::what() const throw() {
