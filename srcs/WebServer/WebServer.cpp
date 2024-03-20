@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 12:00:22 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 13:13:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,49 @@ void	WebServer::closeAllConnections(void)
 void	WebServer::StartServer(void)
 {
 	this->addVServersSockToPoll();
+	bool serverRunning = true;
 
-	
+	while (serverRunning)
+	{
+		if (!verifyPollStatus())
+			return ;
+
+		for (size_t i = 0; i < _pollFds.size(); i++)
+		{
+			if (_pollFds[i].revents & POLLIN)
+			{
+				
+			}
+			else if (_pollFds[i].revents & POLLOUT)
+			{
+				
+			}
+			else if(isPollError(i))
+			{
+				std::cerr << "Error for poll revents" << std::endl;
+			}
+		}
+	}
+}
+
+bool	WebServer::verifyPollStatus(void)
+{
+	ssize_t status;
+
+	status = poll(_pollFds.data(), _pollFds.size(), -1);
+
+	if (status == -1)
+	{
+		std::cerr << "Error in poll." << std::endl;
+		this->closeAllConnections();
+		return (false);
+	}
+	return (true);
+}
+
+bool	WebServer::isPollError(int i)
+{
+	return (_pollFds[i].revents & POLLERR \
+		|| _pollFds[i].revents & POLLHUP \
+		|| _pollFds[i].revents & POLLNVAL);
 }

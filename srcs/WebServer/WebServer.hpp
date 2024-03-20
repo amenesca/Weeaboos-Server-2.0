@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 11:58:15 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/20 13:10:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,13 @@ class WebServer
 		void	setVServers(const std::vector<VirtualServer>& vServers);
 		void	setPollFds(const std::vector<pollfd>& pollFds);
 
-		void	StartServer(void);
-		
 		void	addNewSocketToPoll(int socketFd);
 		void	addVServersSockToPoll(void);
 		void	addNewClientSockToPoll(int clientSocket);
 		void	closeConnection(int index);
 		void	closeAllConnections(void);
+		
+		void	StartServer(void);
+		bool	isPollError(int i);
+		bool	verifyPollStatus(void);
 };
