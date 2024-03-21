@@ -6,14 +6,14 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:12:31 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 17:05:25 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-# include <string>
 # include "../VirtualServer/VirtualServer.hpp"
+# include "../RequestParser/RequestParser.hpp"
 
 class Client
 {

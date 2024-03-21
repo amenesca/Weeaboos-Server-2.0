@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:25:49 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:39:28 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,19 @@ void	WebServer::StartServer(void)
 		// Verificar se tem entrada nos clientes, se existir
 		for (size_t j = _nbrServers; j < this->_pollFds.size(); j++)
 		{
-			
+			if (_pollFds[j].revents & POLLIN)
+			{
+				// receber a request e trata-la
+			}
+			else if (_pollFds[j].revents & POLLOUT)
+			{
+				// enviar resposta
+			}
+			else if(isPollError(j))
+			{
+				std::cerr << "Error for poll revents" << std::endl;
+				serverRunning = false;
+			}
 		}
 	}
 }
