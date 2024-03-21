@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 13:10:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 14:28:59 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ class WebServer
 	private:
 		std::vector<VirtualServer>	_vServers;
 		std::vector<pollfd>			_pollFds;
+		
 
 	public:
 		WebServer(void);
