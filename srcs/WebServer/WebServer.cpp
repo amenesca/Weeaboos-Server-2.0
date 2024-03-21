@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:28:37 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 17:32:41 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 WebServer::WebServer() :
 	_vServers(),
+	_Clients(),
 	_pollFds(),
 	_nbrServers(0)
 {
@@ -23,12 +24,14 @@ WebServer::WebServer() :
 WebServer::~WebServer()
 {
 	_vServers.clear();
+	_Clients.clear();
 	_pollFds.clear();
 	_nbrServers = 0;
 }
 
 WebServer::WebServer(const std::vector<VirtualServer>& vServers, const int& nbrServers) :
 	_vServers(vServers),
+	_Clients(),
 	_pollFds(),
 	_nbrServers(nbrServers)
 {}
@@ -46,6 +49,7 @@ WebServer& WebServer::operator=(const WebServer& src)
 		this->_vServers = src.getVServers();
 		this->_pollFds = src.getPollFds();
 		this->_nbrServers = src.getNbrServers();
+		this->_Clients = src.getClients();
 	}
 	return *this;
 }
@@ -65,6 +69,11 @@ int		WebServer::getNbrServers(void) const
 	return this->_nbrServers;
 }
 
+std::vector<Client>	WebServer::getClients(void) const
+{
+	return this->_Clients;
+}
+
 void	WebServer::setVServers(const std::vector<VirtualServer>& vServers)
 {
 	this->_vServers = vServers;
@@ -78,6 +87,11 @@ void	WebServer::setPollFds(const std::vector<pollfd>& pollFds)
 void	WebServer::setNbrServers(const int& nbrServers)
 {
 	this->_nbrServers = nbrServers;
+}
+
+void	WebServer::setClients(const std::vector<Client>& clients)
+{
+	this->_Clients = clients;
 }
 
 void	WebServer::addVServersSockToPoll(void)
