@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 14:53:28 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:18:24 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 
 Client::Client() :
 	_clientSocket(-1),
-	_client_addr_len(),
 	_client_addr(),
+	_client_addr_len(sizeof(this->_client_addr)),
 	_requestBuffer(""),
-	_bytesRead(0)
+	_bytesRead(0),
+	_serverConfigs()
 {
 	
 }
@@ -46,6 +47,7 @@ Client& Client::operator=(const Client& src)
 		this->_client_addr = src.getClientAddr();
 		this->_requestBuffer = src.getRequestBuffer();
 		this->_bytesRead = src.getBytesRead();
+		this->_serverConfigs = src.getServerConfigs();
 	}
 	return *this;
 }
@@ -73,6 +75,11 @@ std::string	Client::getRequestBuffer(void) const
 ssize_t	Client::getBytesRead(void) const
 {
 	return this->_bytesRead;
+}
+
+VirtualServer Client::getServerConfigs(void) const
+{
+	return this->_serverConfigs;
 }
 
 struct sockaddr_in *Client::getClientAddrPointer(void)
@@ -108,4 +115,9 @@ void Client::setBytesRead(const ssize_t& bytesRead)
 void Client::setClientAddr(const struct sockaddr_in& client_addr)
 {
 	this->_client_addr = client_addr;
+}
+
+void Client::setServerConfigs(const VirtualServer& serverConfigs)
+{
+	this->_serverConfigs = serverConfigs;
 }

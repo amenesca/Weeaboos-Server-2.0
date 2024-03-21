@@ -6,16 +6,16 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:16 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 11:38:37 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:04:51 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
-# include <arpa/inet.h>
 # include <unistd.h>
 # include <cstdio>
 # include <cstring>
+# include <arpa/inet.h>
 
 # include "../Location/Location.hpp"
 

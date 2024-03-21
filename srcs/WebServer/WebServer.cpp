@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 13:13:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:25:49 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@
 
 WebServer::WebServer() :
 	_vServers(),
-	_pollFds()
+	_pollFds(),
+	_nbrServers(0)
 {
 	
 }
@@ -23,11 +24,13 @@ WebServer::~WebServer()
 {
 	_vServers.clear();
 	_pollFds.clear();
+	_nbrServers = 0;
 }
 
-WebServer::WebServer(const std::vector<VirtualServer>& vServers) :
+WebServer::WebServer(const std::vector<VirtualServer>& vServers, const int& nbrServers) :
 	_vServers(vServers),
-	_pollFds()
+	_pollFds(),
+	_nbrServers(nbrServers)
 {}
 
 WebServer::WebServer(const WebServer& copy)
@@ -42,6 +45,7 @@ WebServer& WebServer::operator=(const WebServer& src)
 	{
 		this->_vServers = src.getVServers();
 		this->_pollFds = src.getPollFds();
+		this->_nbrServers = src.getNbrServers();
 	}
 	return *this;
 }
@@ -56,6 +60,11 @@ std::vector<pollfd> WebServer::getPollFds(void) const
 	return this->_pollFds;
 }
 
+int		WebServer::getNbrServers(void) const
+{
+	return this->_nbrServers;
+}
+
 void	WebServer::setVServers(const std::vector<VirtualServer>& vServers)
 {
 	this->_vServers = vServers;
@@ -64,6 +73,11 @@ void	WebServer::setVServers(const std::vector<VirtualServer>& vServers)
 void	WebServer::setPollFds(const std::vector<pollfd>& pollFds)
 {
 	this->_pollFds = pollFds;	
+}
+
+void	WebServer::setNbrServers(const int& nbrServers)
+{
+	this->_nbrServers = nbrServers;
 }
 
 void	WebServer::addVServersSockToPoll(void)
@@ -127,20 +141,24 @@ void	WebServer::StartServer(void)
 		if (!verifyPollStatus())
 			return ;
 
-		for (size_t i = 0; i < _pollFds.size(); i++)
+		 // Verificar se tem entrada no server
+		for (int i = 0; i < _nbrServers; i++)
 		{
 			if (_pollFds[i].revents & POLLIN)
 			{
-				
-			}
-			else if (_pollFds[i].revents & POLLOUT)
-			{
-				
+				this->openNewConnection(i);
 			}
 			else if(isPollError(i))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
+				serverRunning = false;
 			}
+		}
+
+		// Verificar se tem entrada nos clientes, se existir
+		for (size_t j = _nbrServers; j < this->_pollFds.size(); j++)
+		{
+			
 		}
 	}
 }
@@ -165,4 +183,21 @@ bool	WebServer::isPollError(int i)
 	return (_pollFds[i].revents & POLLERR \
 		|| _pollFds[i].revents & POLLHUP \
 		|| _pollFds[i].revents & POLLNVAL);
+}
+
+void	WebServer::openNewConnection(int i)
+{
+	int		newClientSocket;
+	Client	newClient = Client();
+
+	newClientSocket = accept(this->_vServers[i].getFdSocket(),\
+		reinterpret_cast<struct sockaddr*>(newClient.getClientAddrPointer()),\
+		newClient.getClientAddrLenPointer());
+	
+	newClient.setClientSocket(newClientSocket);
+	newClient.setServerConfigs(this->_vServers[i]);
+
+	this->addNewClientSockToPoll(newClient.getClientSocket());
+
+	this->_Clients.push_back(newClient);
 }

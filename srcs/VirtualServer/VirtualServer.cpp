@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 11:31:05 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:26:32 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,6 @@ VirtualServer::~VirtualServer(void)
 	_maxBodySize = 0;
 	_errorPage.clear();
 	_locations.clear();
-	if (isDescriptorOpen(this->_fd_socket))
-	{
-		close(this->_fd_socket);
-	}
-	_fd_socket = -1;
 	_main_port = 0;
 }
 
@@ -131,7 +126,6 @@ std::vector<Location>*	VirtualServer::getLocationsAddress(void)
 {
 	return &this->_locations;
 }
-
 
 void	VirtualServer::setServerDefault(const bool& serverDefault)
 {

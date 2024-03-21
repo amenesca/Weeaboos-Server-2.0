@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 14:28:59 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:10:16 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,27 +15,30 @@
 # include <poll.h>
 # include <fcntl.h>
 # include <iostream>
-# include "../VirtualServer/VirtualServer.hpp"
+# include "../Client/Client.hpp"
 
 class WebServer
 {
 	private:
-		std::vector<VirtualServer>	_vServers;
-		std::vector<pollfd>			_pollFds;
-		
+		std::vector<VirtualServer>	_vServers; // serve para tacar na poll
+		std::vector<Client>			_Clients; // tem que receber as configs
+		std::vector<pollfd>			_pollFds; // primeiras posições sempre do server
+		int							_nbrServers;
 
 	public:
 		WebServer(void);
 		~WebServer(void);
-		WebServer(const std::vector<VirtualServer>& vServers);
+		WebServer(const std::vector<VirtualServer>& vServers, const int& nbrServers);
 		WebServer(const WebServer& copy);
 		WebServer& operator=(const WebServer& src);
 
 		std::vector<VirtualServer> getVServers(void) const;
 		std::vector<pollfd> getPollFds(void) const;
+		int		getNbrServers(void) const;
 
 		void	setVServers(const std::vector<VirtualServer>& vServers);
 		void	setPollFds(const std::vector<pollfd>& pollFds);
+		void	setNbrServers(const int& nbrServers);
 
 		void	addNewSocketToPoll(int socketFd);
 		void	addVServersSockToPoll(void);
@@ -46,4 +49,7 @@ class WebServer
 		void	StartServer(void);
 		bool	isPollError(int i);
 		bool	verifyPollStatus(void);
+		void	receiveData(int i);
+		void	openNewConnection(int i);
+		
 };

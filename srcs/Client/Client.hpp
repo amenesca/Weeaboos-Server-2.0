@@ -6,24 +6,25 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 14:54:32 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 16:12:31 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 # include <string>
-# include <cstring>
-# include <arpa/inet.h>
+# include "../VirtualServer/VirtualServer.hpp"
 
 class Client
 {
     private:
         int					_clientSocket;
-        socklen_t			_client_addr_len;
         struct sockaddr_in	_client_addr;
+        socklen_t			_client_addr_len;
         std::string			_requestBuffer;
         ssize_t				_bytesRead;
+
+		VirtualServer		_serverConfigs;
 	
     public:
         Client();
@@ -32,11 +33,13 @@ class Client
 		Client& operator=(const Client& copy);
 
 
-        int			getClientSocket(void) const;
-		socklen_t	getClientAddrLen(void) const;
-		sockaddr_in	getClientAddr(void) const;
-		std::string	getRequestBuffer(void) const;
-        ssize_t		getBytesRead(void) const;
+        int				getClientSocket(void) const;
+		socklen_t		getClientAddrLen(void) const;
+		sockaddr_in		getClientAddr(void) const;
+		std::string		getRequestBuffer(void) const;
+        ssize_t			getBytesRead(void) const;
+		VirtualServer	getServerConfigs(void) const;
+		
         sockaddr_in	*getClientAddrPointer(void);
         socklen_t	*getClientAddrLenPointer(void);
 
@@ -45,5 +48,6 @@ class Client
         void        setBytesRead(const ssize_t& bytesRead);
         void        setRequestBuffer(const std::string& _requestBuffer);
 		void 		setClientAddr(const struct sockaddr_in& client_addr);
+		void		setServerConfigs(const VirtualServer& serverConfigs);
 
 };
