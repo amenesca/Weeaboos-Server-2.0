@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:15:41 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 17:19:29 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,7 @@ class RequestParser
 
 	// Class Methods
 		void	parse(std::string request);
-		void	validateRequestLine();		
-		void	validateHeader();
+		void	validateRequestLine();
 	
 	// Getters
 		std::string getMethod() const ;
