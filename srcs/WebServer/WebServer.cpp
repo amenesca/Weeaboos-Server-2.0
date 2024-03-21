@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:39:28 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/21 17:28:37 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,16 +151,16 @@ void	WebServer::StartServer(void)
 			else if(isPollError(i))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
-				serverRunning = false;
+//				serverRunning = false;
 			}
 		}
 
 		// Verificar se tem entrada nos clientes, se existir
-		for (size_t j = _nbrServers; j < this->_pollFds.size(); j++)
+		for (size_t j = this->_nbrServers; j < this->_pollFds.size(); j++)
 		{
 			if (_pollFds[j].revents & POLLIN)
 			{
-				// receber a request e trata-la
+				treatRequest(j - this->_nbrServers, j);
 			}
 			else if (_pollFds[j].revents & POLLOUT)
 			{
@@ -212,4 +212,9 @@ void	WebServer::openNewConnection(int i)
 	this->addNewClientSockToPoll(newClient.getClientSocket());
 
 	this->_Clients.push_back(newClient);
+}
+
+void	treatRequest(int clientPos, int pollPos)
+{
+	
 }
