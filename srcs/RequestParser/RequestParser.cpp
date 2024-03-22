@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:14:48 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 14:12:03 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,21 @@ RequestParser::RequestParser() :
 	_portNumber(""),
 	_queryString(""),
 	_requestBody(),
-	_requestHeaders()
-{}
+	_requestHeaders(),
+	_stringBuffer("")
+{
+}
 
 RequestParser::~RequestParser()
 {
+	_requestMethod.clear();
 	_uri.clear();
 	_httpVersion.clear();
 	_portNumber.clear();
 	_queryString.clear();
 	_requestBody.clear();
 	_requestHeaders.clear();
+	_stringBuffer.clear();
 }
 
 RequestParser::RequestParser(std::string request) :
@@ -39,7 +43,8 @@ RequestParser::RequestParser(std::string request) :
 	_portNumber(""),
 	_queryString(""),
 	_requestBody(),
-	_requestHeaders()
+	_requestHeaders(),
+	_stringBuffer("")
 {
 	this->parse(request);
 }
@@ -59,6 +64,7 @@ RequestParser& RequestParser::operator=(const RequestParser& copy)
 		this->_requestMethod = copy.getMethod();
 		this->_uri = copy.getUri();
 		this->_portNumber = copy.getPortNumber();
+		this->_stringBuffer = copy.getStringBuffer();
 	}
 	return *this;
 }
@@ -70,6 +76,56 @@ void RequestParser::parse(std::string request)
 	
     std::string requestLine, headerLine, bodyLine;
     std::istringstream requestStream(request);
+
+    // Solicitation Line parsing
+    std::getline(requestStream, requestLine);
+    std::istringstream requestLineStream(requestLine);
+    requestLineStream >> this->_requestMethod >> this->_uri >> this->_httpVersion;
+
+    // Header parsing
+    while(std::getline(requestStream, headerLine) && headerLine != "\r")
+	{
+        size_t separator = headerLine.find(": ");
+        if (separator != std::string::npos)
+		{
+            std::string key = headerLine.substr(0, separator);
+            std::string value = headerLine.substr(separator + 2); // + 2 para ignorar ": "
+
+            // Se a chave for "Host", extrair apenas o conteúdo antes do ":"
+            if (key == "Host")
+			{
+                size_t portSeparator = value.find(":");
+                if (portSeparator != std::string::npos)
+				{
+                    std::string hostWithoutPort = value.substr(0, portSeparator);
+					std::string portNumber = value.substr(portSeparator + 1);
+
+					value = hostWithoutPort;
+					_portNumber = portNumber;
+                }
+            }
+
+            this->_requestHeaders[key] = value;
+        }
+    }
+    // Body parsing
+	if (_requestMethod == "POST")
+	{
+		while (std::getline(requestStream, bodyLine))
+		{
+			_requestBody.push_back(bodyLine); 
+		}
+    }
+    return;
+}
+
+void RequestParser::parse(void)
+{
+    // Declaring variables
+//	std::cout << "--- PARSER DA REQUEST ---" << std::endl;
+	
+    std::string requestLine, headerLine, bodyLine;
+    std::istringstream requestStream(this->_stringBuffer);
 
     // Solicitation Line parsing
     std::getline(requestStream, requestLine);
@@ -186,6 +242,11 @@ std::string RequestParser::getQueryString()
         _queryString = _uri.substr(pos + 1);
     }
     return _queryString;
+}
+
+std::string RequestParser::getStringBuffer(void) const
+{
+	return this->_stringBuffer;
 }
 
 const char *RequestParser::invalidMethod::what() const throw()

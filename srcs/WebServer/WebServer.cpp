@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:32:41 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 14:06:37 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,17 @@ void	WebServer::openNewConnection(int i)
 	this->_Clients.push_back(newClient);
 }
 
-void	treatRequest(int clientPos, int pollPos)
+void	WebServer::treatRequest(int clientPos, int pollPos)
 {
-	
+	short int errorOnRecv;
+	// checar se a request já foi lida totalmente;
+	if (!this->_Clients[clientPos].getRequestRead())
+	{
+		errorOnRecv = this->_Clients[clientPos].receiveRequest(this->_pollFds[pollPos].fd);
+		if (!errorOnRecv)
+		{
+			this->closeConnection(pollPos);
+			this->_Clients.erase(this->_Clients.begin() + clientPos);
+		}
+	}
 }

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:18:24 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 13:57:08 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,9 @@ Client::Client() :
 	_client_addr_len(sizeof(this->_client_addr)),
 	_requestBuffer(""),
 	_bytesRead(0),
-	_serverConfigs()
+	_requestRead(false),
+	_serverConfigs(),
+	_request()
 {
 	
 }
@@ -28,6 +30,7 @@ Client::~Client()
 	this->_clientSocket = -1;
 	this->_client_addr_len = 0;
 	memset(&this->_client_addr,0,sizeof(this->_client_addr));
+	_requestRead = false;
 	this->_requestBuffer.clear();
 	this->_bytesRead = 0;
 }
@@ -48,6 +51,8 @@ Client& Client::operator=(const Client& src)
 		this->_requestBuffer = src.getRequestBuffer();
 		this->_bytesRead = src.getBytesRead();
 		this->_serverConfigs = src.getServerConfigs();
+		this->_request = src.getRequest();
+		this->_requestRead = src.getRequestRead();
 	}
 	return *this;
 }
@@ -80,6 +85,16 @@ ssize_t	Client::getBytesRead(void) const
 VirtualServer Client::getServerConfigs(void) const
 {
 	return this->_serverConfigs;
+}
+
+RequestParser Client::getRequest(void) const
+{
+	return this->_request;
+}
+
+bool		Client::getRequestRead(void) const
+{
+	return this->_requestRead;
 }
 
 struct sockaddr_in *Client::getClientAddrPointer(void)
@@ -120,4 +135,19 @@ void Client::setClientAddr(const struct sockaddr_in& client_addr)
 void Client::setServerConfigs(const VirtualServer& serverConfigs)
 {
 	this->_serverConfigs = serverConfigs;
+}
+
+void Client::setRequest(const RequestParser& request)
+{
+	this->_request = request;
+}
+
+void Client::setRequestRead(const bool& requestRead)
+{
+	this->_requestRead = requestRead;
+}
+
+short int	Client::receiveRequest(int client)
+{
+	
 }

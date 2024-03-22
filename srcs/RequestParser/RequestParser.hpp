@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:19:29 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 13:51:18 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@ class RequestParser
 		std::vector<std::string> 			_requestBody;
 		std::map<std::string, std::string>	_requestHeaders;
 
+		std::string							_stringBuffer;
+
 	// Private Methods
 		int _validateUri();
 	public:
@@ -44,6 +46,7 @@ class RequestParser
 
 	// Class Methods
 		void	parse(std::string request);
+		void 	parse(void);
 		void	validateRequestLine();
 	
 	// Getters
@@ -54,6 +57,7 @@ class RequestParser
 		std::map<std::string, std::string> getHeaders() const;
 		std::string getPortNumber() const;
 		std::string getQueryString();
+		std::string getStringBuffer() const;
 
 	// Exceptions
 		class invalidMethod : public std::exception {
