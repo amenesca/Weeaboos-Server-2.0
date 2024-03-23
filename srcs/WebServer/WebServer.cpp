@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 14:06:37 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 22:10:50 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,7 @@ void	WebServer::StartServer(void)
 			}
 			else if (_pollFds[j].revents & POLLOUT)
 			{
-				// enviar resposta
+				treatResponse(j - this->_nbrServers, j);
 			}
 			else if(isPollError(j))
 			{
@@ -241,4 +241,12 @@ void	WebServer::treatRequest(int clientPos, int pollPos)
 			this->_Clients.erase(this->_Clients.begin() + clientPos);
 		}
 	}
+}
+
+void WebServer::treatResponse(int clientPos, int pollPos)
+{
+//	(void)clientPos;
+	(void)pollPos;
+	if (_Clients[clientPos].getRequestRead())
+		std::cout << "Entrou Aqui" << std::endl;
 }

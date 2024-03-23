@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 13:51:18 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 22:11:54 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <cerrno>
 # include <cstring>
 # include <vector>
+# include <cstdlib>
 
 class RequestParser
 {
@@ -32,7 +33,9 @@ class RequestParser
 		std::vector<std::string> 			_requestBody;
 		std::map<std::string, std::string>	_requestHeaders;
 
-		std::string							_stringBuffer;
+		std::string							_stringBuffer; // inutilizado
+		int									_totalBytesOnBody;
+		int									_contentLenght;
 
 	// Private Methods
 		int _validateUri();
@@ -48,16 +51,21 @@ class RequestParser
 		void	parse(std::string request);
 		void 	parse(void);
 		void	validateRequestLine();
+		void 	appendBody(const std::string& buffer);
 	
 	// Getters
-		std::string getMethod() const ;
-		std::string getUri() const;
-		std::string getHttpVersion() const;
-		std::vector<std::string> getRequestBody() const;
-		std::map<std::string, std::string> getHeaders() const;
-		std::string getPortNumber() const;
-		std::string getQueryString();
-		std::string getStringBuffer() const;
+		std::string 						getMethod() const ;
+		std::string 						getUri() const;
+		std::string							getHttpVersion() const;
+		std::vector<std::string>			getRequestBody() const;
+		std::map<std::string, std::string>	getHeaders() const;
+		std::string							getPortNumber() const;
+		std::string							getQueryString();
+		std::string							getStringBuffer() const;
+		int									getTotalBytesOnBody() const;
+		int									getContentLenght() const;
+
+		void setContentLenght(const int& contentLenght);
 
 	// Exceptions
 		class invalidMethod : public std::exception {

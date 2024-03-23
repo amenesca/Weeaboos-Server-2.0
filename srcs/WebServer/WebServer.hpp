@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 17:33:26 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 22:01:06 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,5 +53,7 @@ class WebServer
 		bool	verifyPollStatus(void);
 		void	openNewConnection(int i);
 		void	treatRequest(int clientPos, int pollPos);
+		void	treatResponse(int clientPos, int pollPos);
+
 		
 };

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 13:57:08 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 22:07:50 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,9 @@ Client::Client() :
 	_requestBuffer(""),
 	_bytesRead(0),
 	_requestRead(false),
+	_firstTimeRequest(true),
 	_serverConfigs(),
-	_request()
+	_requestParser()
 {
 	
 }
@@ -31,6 +32,7 @@ Client::~Client()
 	this->_client_addr_len = 0;
 	memset(&this->_client_addr,0,sizeof(this->_client_addr));
 	_requestRead = false;
+	_firstTimeRequest = false;
 	this->_requestBuffer.clear();
 	this->_bytesRead = 0;
 }
@@ -51,8 +53,9 @@ Client& Client::operator=(const Client& src)
 		this->_requestBuffer = src.getRequestBuffer();
 		this->_bytesRead = src.getBytesRead();
 		this->_serverConfigs = src.getServerConfigs();
-		this->_request = src.getRequest();
+		this->_requestParser = src.getRequest();
 		this->_requestRead = src.getRequestRead();
+		this->_firstTimeRequest = src.getFirstTimeRequest();
 	}
 	return *this;
 }
@@ -89,12 +92,17 @@ VirtualServer Client::getServerConfigs(void) const
 
 RequestParser Client::getRequest(void) const
 {
-	return this->_request;
+	return this->_requestParser;
 }
 
 bool		Client::getRequestRead(void) const
 {
 	return this->_requestRead;
+}
+
+bool		Client::getFirstTimeRequest(void) const
+{
+	return this->_firstTimeRequest;
 }
 
 struct sockaddr_in *Client::getClientAddrPointer(void)
@@ -139,7 +147,7 @@ void Client::setServerConfigs(const VirtualServer& serverConfigs)
 
 void Client::setRequest(const RequestParser& request)
 {
-	this->_request = request;
+	this->_requestParser = request;
 }
 
 void Client::setRequestRead(const bool& requestRead)
@@ -147,7 +155,57 @@ void Client::setRequestRead(const bool& requestRead)
 	this->_requestRead = requestRead;
 }
 
+void Client::setFirstTimeRequest(const bool& firstTimeRequest)
+{
+	this->_firstTimeRequest = firstTimeRequest;
+}
+
+std::string Client::uint8_to_string(const uint8_t* data, size_t size) {
+    return std::string(reinterpret_cast<const char*>(data), size);
+}
+
 short int	Client::receiveRequest(int client)
 {
+	uint8_t	buffer[4096];
+	int		bytes;
+
+	memset(buffer, 0, sizeof(uint8_t) * 4096);
+
+	bytes = recv(client, buffer, 4095, 0);
+	if (bytes == -1)
+		return false;
+	else if (bytes == 0)
+	{
+		std::cout << "Client disconnected" << std::endl;
+		return false;
+	}
 	
+	std::cout << buffer << std::endl;
+	
+	if (this->_firstTimeRequest == true)
+	{
+		this->_requestParser.parse(uint8_to_string(buffer, bytes));
+	}
+
+	if (this->_requestParser.getMethod() == "GET" \
+		|| this->_requestParser.getMethod() == "DELETE")
+	{
+		this->setRequestRead(true);
+		return true;
+	}
+	if (this->_requestParser.getMethod() == "POST" && \
+		this->_firstTimeRequest == false)
+	{
+		this->_requestParser.appendBody(uint8_to_string(buffer, bytes));
+		if (this->_requestParser.getTotalBytesOnBody() == \
+			this->_requestParser.getContentLenght())
+		{
+			this->setRequestRead(true);
+			return true;
+		}
+	}
+	
+	if (this->_firstTimeRequest == true)
+		this->setFirstTimeRequest(false);
+	return true;
 }

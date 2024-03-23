@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 14:12:29 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/22 22:11:45 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,13 @@ class Client
         int					_clientSocket;
         struct sockaddr_in	_client_addr;
         socklen_t			_client_addr_len;
-        std::string			_requestBuffer;
+        std::string			_requestBuffer; // inutilizado
         ssize_t				_bytesRead;
 		bool				_requestRead;
+		bool				_firstTimeRequest;
 
 		VirtualServer		_serverConfigs;
-		RequestParser		_request;
+		RequestParser		_requestParser;
 		
     public:
         Client();
@@ -43,6 +44,7 @@ class Client
 		VirtualServer	getServerConfigs(void) const;
 		RequestParser	getRequest(void) const;
 		bool			getRequestRead(void) const;
+		bool			getFirstTimeRequest(void) const;
 		
         sockaddr_in	*getClientAddrPointer(void);
         socklen_t	*getClientAddrLenPointer(void);
@@ -55,7 +57,9 @@ class Client
 		void		setServerConfigs(const VirtualServer& serverConfigs);
 		void		setRequest(const RequestParser& request);
 		void		setRequestRead(const bool& requestRead);
+		void		setFirstTimeRequest(const bool& firstTimeRequest);
 
 		short int	receiveRequest(int client);
+		std::string uint8_to_string(const uint8_t* data, size_t size);
 
 };
