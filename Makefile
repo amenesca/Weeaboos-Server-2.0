@@ -8,7 +8,10 @@ CLASSES =	srcs/Location/Location.cpp\
 			srcs/ConfigParser/ConfigParser.cpp\
 			srcs/WebServer/WebServer.cpp\
 			srcs/Client/Client.cpp\
-			srcs/RequestParser/RequestParser.cpp
+			srcs/RequestParser/RequestParser.cpp\
+			srcs/Response/Response.cpp\
+			srcs/CgiHandler/CgiHandler.cpp\
+			srcs/ServerLog/ServerLog.cpp
 
 SRCS = $(CLASSES) srcs/main.cpp
 

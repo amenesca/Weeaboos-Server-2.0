@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:01:06 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/23 18:37:56 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <fcntl.h>
 # include <iostream>
 # include "../Client/Client.hpp"
+# include "../Response/Response.hpp"
 
 class WebServer
 {

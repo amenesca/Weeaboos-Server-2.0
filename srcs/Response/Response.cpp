@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/23 18:27:34 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/23 19:01:40 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ std::string Response::readData(const std::string& uri)
     if (_client.getServerConfigs().getLocations().size() > 1) {
         for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
             if (_client.getServerConfigs().getLocations()[i].getPath() == uri) {
-                path = _client.getServerConfigs().getRoot() + _client.getServerConfigs().getLocations()[i].getIndex()[1];
+                path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
                 std::cout << path << std::endl;
 				break;
             }
@@ -130,6 +130,7 @@ std::string Response::readData(const std::string& uri)
 	}
     std::ifstream file(path.c_str());
     if (!file.is_open()) {
+		std::cout << "Error opening index.html" << std::endl;
         return ("");
     }
     std::string data;

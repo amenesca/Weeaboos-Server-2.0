@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/20 10:55:52 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/23 18:55:29 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -252,36 +252,51 @@ void ConfigParser::treatLocation(VirtualServer* currentServer, std::string locat
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setCgiExtension(split(buff)[1]);
+			continue;
 		}
 		else if (buff.find("upload", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos) {
+		buff.find("}") == std::string::npos)
+		{
 			locationInstance.setUpload(split(buff)[1]);
+			continue;
 		}
 		else if (buff.find("index", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos) {
+		buff.find("}") == std::string::npos)
+		{
+			if (buff.find("autoindex", 0) != std::string::npos)
+				continue;
 			locationInstance.setIndex(split(buff));
+			continue;
 		}
 		else if (buff.find("autoindex", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos) {
+		buff.find("}") == std::string::npos)
+		{
 			locationInstance.setAutoIndex(treatAutoIndex(split(buff)[1]));
+			continue;
 		}
 		else if (buff.find("methods", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos) {
+		buff.find("}") == std::string::npos)
+		{
 			locationInstance.setMethods(split(buff));
+			continue;
 		}
 		else if (buff.find("return", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos) {
+		buff.find("}") == std::string::npos)
+		{
 			locationInstance.setReturn(split(buff)[1]);
 		}
-		else if (buff.find("}", 0) != std::string::npos) {
+		else if (buff.find("}", 0) != std::string::npos)
+		{
 			rightBrace = true;
 			break;
 		}
-		else {
+		else
+		{
 			throw InvalidSyntax();
 		}
 	}
-	if (rightBrace == false) {
+	if (rightBrace == false)
+	{
 			throw InvalidSyntax();
 	}
 	currentServer->getLocationsAddress()->push_back(locationInstance);
@@ -307,36 +322,43 @@ void ConfigParser::configVServer(VirtualServer* currentServer)
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setPort(StrVecToIntVecPort(split(buff)));
+			continue;
 		}
 		else if (buff.find("root", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setRoot(split(buff)[1]);
+			continue;
 		}
 		else if (buff.find("server_name", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setServerName(split(buff));
+			continue;
 		}
 		else if (buff.find("host", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setHost(treatHost(split(buff)[1]));
+			continue;
 		}
 		else if (buff.find("index", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setIndex(split(buff));
+			continue;
 		}
 		else if (buff.find("max_body_size", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setMaxBodySize(treatMaxBodySize(split(buff)[1]) && \
-		buff.find("}") == std::string::npos);
+			buff.find("}") == std::string::npos);
+			continue;
 		}
 		else if (buff.find("error_page", 0) != std::string::npos)
 		{
 			currentServer->setErrorPage(split(buff));
+			continue;
 		}
 		else if (buff.find("location", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos) 
@@ -346,6 +368,7 @@ void ConfigParser::configVServer(VirtualServer* currentServer)
 				throw InvalidSyntax();
 			}
 			treatLocation(currentServer, split(buff)[1]);
+			continue;
 		}
 		else
 		{

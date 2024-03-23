@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:10:50 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/23 18:58:43 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -245,8 +245,19 @@ void	WebServer::treatRequest(int clientPos, int pollPos)
 
 void WebServer::treatResponse(int clientPos, int pollPos)
 {
-//	(void)clientPos;
-	(void)pollPos;
 	if (_Clients[clientPos].getRequestRead())
-		std::cout << "Entrou Aqui" << std::endl;
+	{
+		Response makeResponse(_Clients[clientPos]);
+		makeResponse.httpMethods();
+
+		std::string response = makeResponse.getHttpMessage();
+
+		std::cout << response << std::endl;
+
+		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
+
+		this->closeConnection(pollPos);
+		this->_Clients.erase(this->_Clients.begin() + clientPos);
+	}
+
 }

@@ -6,15 +6,15 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/23 18:14:32 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/23 18:33:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "CgiHandler.hpp"
 
 CgiHandler::CgiHandler() :
-	_env(),
 	_pid(0),
+	_env(),
 	_request_pipe(),
 	_request(),
 	_log()
@@ -26,8 +26,8 @@ CgiHandler::CgiHandler() :
 }
 
 CgiHandler::CgiHandler(RequestParser request) :
-	_env(),
 	_pid(0),
+	_env(),
 	_request_pipe(),
 	_request(request),
 	_log()
