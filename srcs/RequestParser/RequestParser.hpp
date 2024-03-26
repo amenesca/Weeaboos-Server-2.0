@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:11:54 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 21:49:13 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class RequestParser
 		std::map<std::string, std::string>	_requestHeaders;
 
 		std::string							_stringBuffer; // inutilizado
-		int									_totalBytesOnBody;
 		int									_contentLenght;
 
 	// Private Methods
@@ -62,7 +61,6 @@ class RequestParser
 		std::string							getPortNumber() const;
 		std::string							getQueryString();
 		std::string							getStringBuffer() const;
-		int									getTotalBytesOnBody() const;
 		int									getContentLenght() const;
 
 		void setContentLenght(const int& contentLenght);

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:11:45 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 21:40:56 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ class Client
 
 		VirtualServer		_serverConfigs;
 		RequestParser		_requestParser;
+		ssize_t				_totalBodyBytes;
 		
     public:
         Client();
@@ -45,6 +46,7 @@ class Client
 		RequestParser	getRequest(void) const;
 		bool			getRequestRead(void) const;
 		bool			getFirstTimeRequest(void) const;
+		ssize_t			getTotalBodyBytes(void) const;
 		
         sockaddr_in	*getClientAddrPointer(void);
         socklen_t	*getClientAddrLenPointer(void);
@@ -61,5 +63,6 @@ class Client
 
 		short int	receiveRequest(int client);
 		std::string uint8_to_string(const uint8_t* data, size_t size);
+		int countBytesUntilCRLF(const uint8_t* data, int dataSize) const;
 
 };

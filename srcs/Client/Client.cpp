@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:07:50 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 21:59:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,8 @@ Client::Client() :
 	_requestRead(false),
 	_firstTimeRequest(true),
 	_serverConfigs(),
-	_requestParser()
+	_requestParser(),
+	_totalBodyBytes(0)
 {
 	
 }
@@ -35,6 +36,7 @@ Client::~Client()
 	_firstTimeRequest = false;
 	this->_requestBuffer.clear();
 	this->_bytesRead = 0;
+	this->_totalBodyBytes = 0;
 }
 
 Client::Client(const Client& copy)
@@ -56,6 +58,7 @@ Client& Client::operator=(const Client& src)
 		this->_requestParser = src.getRequest();
 		this->_requestRead = src.getRequestRead();
 		this->_firstTimeRequest = src.getFirstTimeRequest();
+		this->_totalBodyBytes = src.getTotalBodyBytes();
 	}
 	return *this;
 }
@@ -103,6 +106,11 @@ bool		Client::getRequestRead(void) const
 bool		Client::getFirstTimeRequest(void) const
 {
 	return this->_firstTimeRequest;
+}
+
+ssize_t Client::getTotalBodyBytes(void) const
+{
+	return this->_totalBodyBytes;
 }
 
 struct sockaddr_in *Client::getClientAddrPointer(void)
@@ -160,14 +168,30 @@ void Client::setFirstTimeRequest(const bool& firstTimeRequest)
 	this->_firstTimeRequest = firstTimeRequest;
 }
 
-std::string Client::uint8_to_string(const uint8_t* data, size_t size) {
+std::string Client::uint8_to_string(const uint8_t* data, size_t size)
+{
     return std::string(reinterpret_cast<const char*>(data), size);
+}
+
+int Client::countBytesUntilCRLF(const uint8_t* data, int dataSize) const
+{
+    int count = 0;
+    for (int i = 0; i < dataSize - 3; ++i)
+	{
+        if (data[i] == '\r' && data[i + 1] == '\n' && data[i + 2] == '\r' && data[i + 3] == '\n')
+		{
+            count += i + 4; // Incluir os bytes da sequência "\r\n\r\n"
+            break;
+        }
+    }
+    return count;
 }
 
 short int	Client::receiveRequest(int client)
 {
 	uint8_t	buffer[4096];
 	int		bytes;
+	ssize_t	headerBytes;
 
 	memset(buffer, 0, sizeof(uint8_t) * 4096);
 
@@ -180,7 +204,7 @@ short int	Client::receiveRequest(int client)
 		return false;
 	}
 	
-	std::cout << buffer << std::endl;
+//	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
@@ -193,12 +217,22 @@ short int	Client::receiveRequest(int client)
 		this->setRequestRead(true);
 		return true;
 	}
+
+	if (this->_requestParser.getMethod() == "POST" && this->_firstTimeRequest == true)
+	{
+		headerBytes = countBytesUntilCRLF(buffer, bytes);
+		_totalBodyBytes += bytes - headerBytes;
+	}
+
 	if (this->_requestParser.getMethod() == "POST" && \
 		this->_firstTimeRequest == false)
 	{
 		this->_requestParser.appendBody(uint8_to_string(buffer, bytes));
-		if (this->_requestParser.getTotalBytesOnBody() == \
-			this->_requestParser.getContentLenght())
+		this->_totalBodyBytes += bytes;
+		std::cout << "Contagem total dos bytes: " << this->_totalBodyBytes << std::endl;
+		std::cout << "Content Lenght requerido: " << this->_requestParser.getContentLenght() << std::endl;
+		
+		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
 			this->setRequestRead(true);
 			return true;

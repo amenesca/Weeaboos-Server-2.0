@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/22 22:06:11 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 21:45:15 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ RequestParser::RequestParser() :
 	_requestBody(),
 	_requestHeaders(),
 	_stringBuffer(""),
-	_totalBytesOnBody(0),
 	_contentLenght(0)
 {
 }
@@ -36,7 +35,6 @@ RequestParser::~RequestParser()
 	_requestBody.clear();
 	_requestHeaders.clear();
 	_stringBuffer.clear();
-	_totalBytesOnBody = 0;
 	_contentLenght = 0;
 }
 
@@ -49,7 +47,6 @@ RequestParser::RequestParser(std::string request) :
 	_requestBody(),
 	_requestHeaders(),
 	_stringBuffer(""),
-	_totalBytesOnBody(0),
 	_contentLenght(0)
 {
 	this->parse(request);
@@ -71,7 +68,6 @@ RequestParser& RequestParser::operator=(const RequestParser& copy)
 		this->_uri = copy.getUri();
 		this->_portNumber = copy.getPortNumber();
 		this->_stringBuffer = copy.getStringBuffer();
-		this->_totalBytesOnBody = copy.getTotalBytesOnBody();
 		this->_contentLenght = copy.getContentLenght();
 	}
 	return *this;
@@ -91,7 +87,7 @@ void RequestParser::parse(std::string request)
     requestLineStream >> this->_requestMethod >> this->_uri >> this->_httpVersion;
 
     // Header parsing
-    while(std::getline(requestStream, headerLine) && headerLine != "\r")
+    while(std::getline(requestStream, headerLine) && headerLine != "\r\n\r\n")
 	{
         size_t separator = headerLine.find(": ");
         if (separator != std::string::npos)
@@ -119,11 +115,10 @@ void RequestParser::parse(std::string request)
     // Body parsing
 	if (_requestMethod == "POST")
 	{
-		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Lenght"].c_str());
+		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Length"].c_str());
 		while (std::getline(requestStream, bodyLine))
 		{
 			_requestBody.push_back(bodyLine);
-			this->_totalBytesOnBody += bodyLine.size();
 		}
     }
     return;
@@ -175,7 +170,6 @@ void RequestParser::parse(void)
 		while (std::getline(requestStream, bodyLine))
 		{
 			_requestBody.push_back(bodyLine);
-			this->_totalBytesOnBody += bodyLine.size();
 		}
     }
     return;
@@ -188,7 +182,6 @@ void RequestParser::appendBody(const std::string& buffer)
     while (std::getline(bufferStream, line))
 	{
         _requestBody.push_back(line);
-		this->_totalBytesOnBody += line.size();
     }
 }
 
@@ -270,11 +263,6 @@ std::string RequestParser::getQueryString()
 std::string RequestParser::getStringBuffer(void) const
 {
 	return this->_stringBuffer;
-}
-
-int			RequestParser::getTotalBytesOnBody(void) const
-{
-	return this->_totalBytesOnBody;
 }
 
 int			RequestParser::getContentLenght(void) const

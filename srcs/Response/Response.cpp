@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/23 19:01:40 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 21:55:10 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,9 +165,9 @@ void Response::handleGET()
 void Response::handlePOST()
 {
     std::vector<std::string> bodyData = _client.getRequest().getRequestBody();
-    for (size_t i = 0; i < bodyData.size(); i++) {
-        std::cout << "BODY: " << bodyData[i] << "\n";
-    }
+//    for (size_t i = 0; i < bodyData.size(); i++) {
+//        std::cout << "BODY: " << bodyData[i] << "\n";
+//    }
 	
     std::string uri = _client.getRequest().getUri();
     std::cout << "PROCURANDO URI: " << uri << "\n";
