@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/25 21:55:10 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 22:43:21 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ std::string Response::readData(const std::string& uri)
         }
     }
     else {
-        path = _client.getServerConfigs().getRoot() + uri;
+        path = _client.getServerConfigs().getRoot() + uri + _client.getServerConfigs().getLocations()[0].getIndex()[1];
 	}
     std::ifstream file(path.c_str());
     if (!file.is_open()) {
@@ -146,7 +146,7 @@ std::string Response::readData(const std::string& uri)
 void Response::handleGET()
 {
     std::string	uri = _client.getRequest().getUri();
-//    std::cout << "BODY: " << _request.getBody() << "\n"; // Desnecessário o GET não tem body na request!
+//	std::cout << "Valor da URI" << uri << std::endl;
     std::string	data = readData(uri);
      if (!data.empty()) {
         setStatus(200);
@@ -189,6 +189,7 @@ void Response::handlePOST()
 void Response::httpMethods()
 {
     if (_client.getRequest().getMethod() == "GET") {
+		std::cout << "Handle get" << std::endl;
 		handleGET();
 	}
     else if (_client.getRequest().getMethod() == "POST") {

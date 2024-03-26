@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 22:11:34 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 22:43:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,7 @@ short int	Client::receiveRequest(int client)
 		return false;
 	}
 	
-//	std::cout << buffer << "\nFim do buffer\n" << std::endl;
+	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
@@ -235,8 +235,8 @@ short int	Client::receiveRequest(int client)
 	{
 		this->_requestParser.appendBody(uint8_to_string(buffer, bytes));
 		this->_totalBodyBytes += bytes;
-		std::cout << "Contagem total dos bytes: " << this->_totalBodyBytes << std::endl;
-		std::cout << "Content Lenght requerido: " << this->_requestParser.getContentLenght() << std::endl;
+//		std::cout << "Contagem total dos bytes: " << this->_totalBodyBytes << std::endl;
+//		std::cout << "Content Lenght requerido: " << this->_requestParser.getContentLenght() << std::endl;
 		
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
