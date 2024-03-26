@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 22:43:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 23:49:58 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,6 +222,8 @@ short int	Client::receiveRequest(int client)
 	{
 		headerBytes = countBytesUntilCRLF(buffer, bytes);
 		_totalBodyBytes += bytes - headerBytes;
+
+		// fazer função nova para fazer append da posição do fim dos headers(inicio do body) na string newRequestBody
 
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{

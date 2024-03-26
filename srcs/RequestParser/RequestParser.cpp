@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 21:45:15 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 23:46:43 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ RequestParser::RequestParser() :
 	_portNumber(""),
 	_queryString(""),
 	_requestBody(),
+	_newRequestBody(""),
 	_requestHeaders(),
 	_stringBuffer(""),
 	_contentLenght(0)
@@ -33,6 +34,7 @@ RequestParser::~RequestParser()
 	_portNumber.clear();
 	_queryString.clear();
 	_requestBody.clear();
+	_newRequestBody.clear();
 	_requestHeaders.clear();
 	_stringBuffer.clear();
 	_contentLenght = 0;
@@ -45,6 +47,7 @@ RequestParser::RequestParser(std::string request) :
 	_portNumber(""),
 	_queryString(""),
 	_requestBody(),
+	_newRequestBody(""),
 	_requestHeaders(),
 	_stringBuffer(""),
 	_contentLenght(0)
@@ -63,6 +66,7 @@ RequestParser& RequestParser::operator=(const RequestParser& copy)
 	{
 		this->_httpVersion = copy.getHttpVersion();
 		this->_requestBody = copy.getRequestBody();
+		this->_newRequestBody = copy.getNewRequestBody();
 		this->_requestHeaders = copy.getHeaders();
 		this->_requestMethod = copy.getMethod();
 		this->_uri = copy.getUri();
@@ -116,10 +120,10 @@ void RequestParser::parse(std::string request)
 	if (_requestMethod == "POST")
 	{
 		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Length"].c_str());
-		while (std::getline(requestStream, bodyLine))
-		{
-			_requestBody.push_back(bodyLine);
-		}
+		// while (std::getline(requestStream, bodyLine))
+		// {
+		// 	_requestBody.push_back(bodyLine);
+		// }
     }
     return;
 }
@@ -167,10 +171,10 @@ void RequestParser::parse(void)
 	if (_requestMethod == "POST")
 	{
 		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Lenght"].c_str());
-		while (std::getline(requestStream, bodyLine))
-		{
-			_requestBody.push_back(bodyLine);
-		}
+		// while (std::getline(requestStream, bodyLine))
+		// {
+		// 	_requestBody.push_back(bodyLine);
+		// }
     }
     return;
 }
@@ -268,6 +272,11 @@ std::string RequestParser::getStringBuffer(void) const
 int			RequestParser::getContentLenght(void) const
 {
 	return this->_contentLenght;
+}
+
+std::string	RequestParser::getNewRequestBody(void) const
+{
+	return this->_newRequestBody;
 }
 
 void	RequestParser::setContentLenght(const int& contentLenght)

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 21:49:13 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 23:45:43 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ class RequestParser
 		std::string 						_portNumber;
 		std::string 						_queryString;
 		std::vector<std::string> 			_requestBody;
+		std::string							_newRequestBody;
 		std::map<std::string, std::string>	_requestHeaders;
 
 		std::string							_stringBuffer; // inutilizado
@@ -62,6 +63,7 @@ class RequestParser
 		std::string							getQueryString();
 		std::string							getStringBuffer() const;
 		int									getContentLenght() const;
+		std::string							getNewRequestBody() const;
 
 		void setContentLenght(const int& contentLenght);
 
