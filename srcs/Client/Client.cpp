@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 21:59:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/25 22:11:34 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,6 +222,12 @@ short int	Client::receiveRequest(int client)
 	{
 		headerBytes = countBytesUntilCRLF(buffer, bytes);
 		_totalBodyBytes += bytes - headerBytes;
+
+		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
+		{
+			this->setRequestRead(true);
+			return true;
+		}
 	}
 
 	if (this->_requestParser.getMethod() == "POST" && \
