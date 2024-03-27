@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/26 22:27:32 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 19:38:20 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,9 +165,7 @@ void Response::handleGET()
 void Response::handlePOST()
 {
 	std::string bodyData = _client.getRequest().getNewRequestBody();
-//    for (size_t i = 0; i < bodyData.size(); i++) {
-//        std::cout << "BODY: " << bodyData[i] << "\n";
-//    }
+//	std::cout << bodyData << "\nBody Printado"<< std::endl;
 	
     std::string uri = _client.getRequest().getUri();
 //	std::cout << "PROCURANDO URI: " << uri << "\n";

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/27 16:45:42 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 19:34:12 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -259,6 +259,7 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 	if (_Clients[clientPos].getRequestRead())
 	{
 //		std::cout << "ENTROU AQUI" << std::endl;
+//	std::cout << "Imprimindo Content-Type: " << _Clients[clientPos].getRequest().getHeaders()["Content-Type"] << std::endl;
 		Response makeResponse(_Clients[clientPos]);
 		makeResponse.httpMethods();
 

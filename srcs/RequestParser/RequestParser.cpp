@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:48:16 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 19:34:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,11 @@ void RequestParser::parse(std::string request)
             }
 
             this->_requestHeaders[key] = value;
+			if (headerLine.find("Sec-Fetch-User: ?1") != std::string::npos)
+			{
+				std::cout << "Condição funcionou" << std::endl;
+				break;
+			}
         }
     }
     // Body parsing
@@ -134,8 +139,9 @@ void RequestParser::parse(void)
     requestLineStream >> this->_requestMethod >> this->_uri >> this->_httpVersion;
 
     // Header parsing
-    while(std::getline(requestStream, headerLine) && headerLine != "\r\n\r\n")
+    while(std::getline(requestStream, headerLine) && headerLine != "\r\n")
 	{
+//		std::cout << "PRINTANDO HEADER LINE: " << headerLine << std::endl;
         size_t separator = headerLine.find(": ");
         if (separator != std::string::npos)
 		{
@@ -157,6 +163,11 @@ void RequestParser::parse(void)
             }
 
             this->_requestHeaders[key] = value;
+			if (headerLine.find("Sec-Fetch-User: ?1") != std::string::npos)
+			{
+//				std::cout << "Condição funcionou" << std::endl;
+				break;
+			}
         }
     }
     // Body parsing
