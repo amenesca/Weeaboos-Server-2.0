@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 21:40:56 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:23:41 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Client
 		void		setFirstTimeRequest(const bool& firstTimeRequest);
 
 		short int	receiveRequest(int client);
-		std::string uint8_to_string(const uint8_t* data, size_t size);
+		std::string u_int8_to_string(const uint8_t* data, size_t size);
 		int countBytesUntilCRLF(const uint8_t* data, int dataSize) const;
 
 };

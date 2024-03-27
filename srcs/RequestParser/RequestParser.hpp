@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 23:45:43 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:22:56 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 # include <cstring>
 # include <vector>
 # include <cstdlib>
+# include <cstdio>
 
 class RequestParser
 {
@@ -51,7 +52,8 @@ class RequestParser
 		void	parse(std::string request);
 		void 	parse(void);
 		void	validateRequestLine();
-		void 	appendBody(const std::string& buffer);
+		void	startBody(ssize_t bytesReceived, ssize_t bodyPosition,const u_int8_t *buffer);
+		void 	appendBody(const u_int8_t* buffer, ssize_t bytesReceived);
 	
 	// Getters
 		std::string 						getMethod() const ;
