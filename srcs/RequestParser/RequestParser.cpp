@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:24:37 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:48:16 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@ RequestParser::RequestParser() :
 	_httpVersion(""),
 	_portNumber(""),
 	_queryString(""),
-	_requestBody(),
 	_newRequestBody(""),
 	_requestHeaders(),
 	_stringBuffer(""),
@@ -33,7 +32,6 @@ RequestParser::~RequestParser()
 	_httpVersion.clear();
 	_portNumber.clear();
 	_queryString.clear();
-	_requestBody.clear();
 	_newRequestBody.clear();
 	_requestHeaders.clear();
 	_stringBuffer.clear();
@@ -46,7 +44,6 @@ RequestParser::RequestParser(std::string request) :
 	_httpVersion(""),
 	_portNumber(""),
 	_queryString(""),
-	_requestBody(),
 	_newRequestBody(""),
 	_requestHeaders(),
 	_stringBuffer(""),
@@ -65,7 +62,6 @@ RequestParser& RequestParser::operator=(const RequestParser& copy)
 	if (this != &copy)
 	{
 		this->_httpVersion = copy.getHttpVersion();
-		this->_requestBody = copy.getRequestBody();
 		this->_newRequestBody = copy.getNewRequestBody();
 		this->_requestHeaders = copy.getHeaders();
 		this->_requestMethod = copy.getMethod();
@@ -235,11 +231,6 @@ std::string RequestParser::getUri() const
 std::string RequestParser::getHttpVersion() const
 {
 	return this->_httpVersion;
-}
-
-std::vector<std::string> RequestParser::getRequestBody() const
-{
-	return this->_requestBody;
 }
 
 std::string RequestParser::getPortNumber() const

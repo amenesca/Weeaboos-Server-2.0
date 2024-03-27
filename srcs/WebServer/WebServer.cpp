@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 22:43:07 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 22:48:13 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,7 @@ void	WebServer::addNewClientSockToPoll(int clientSocket)
 
 void	WebServer::closeConnection(int index)
 {
-	std::cout << "Closing connection: " << this->_pollFds[index].fd \
+	std::cout << "Closing connection fd: " << this->_pollFds[index].fd \
 	<< std::endl;
 	close(this->_pollFds[index].fd);
 	this->_pollFds.erase(this->_pollFds.begin() + index);
@@ -219,6 +219,8 @@ void	WebServer::openNewConnection(int i)
 	newClientSocket = accept(this->_vServers[i].getFdSocket(),\
 		reinterpret_cast<struct sockaddr*>(newClient.getClientAddrPointer()),\
 		newClient.getClientAddrLenPointer());
+
+	std::cout << "Valor do novo Cliente Socket" << newClientSocket << std::endl;
 	
 	newClient.setClientSocket(newClientSocket);
 	newClient.setServerConfigs(this->_vServers[i]);
@@ -234,9 +236,11 @@ void	WebServer::treatRequest(int clientPos, int pollPos)
 	// checar se a request já foi lida totalmente;
 	if (!this->_Clients[clientPos].getRequestRead())
 	{
+		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
 		errorOnRecv = this->_Clients[clientPos].receiveRequest(this->_pollFds[pollPos].fd);
 		if (!errorOnRecv)
 		{
+			std::cout << "Close Connection da Request" << std::endl;
 			this->closeConnection(pollPos);
 			this->_Clients.erase(this->_Clients.begin() + clientPos);
 		}
@@ -257,6 +261,8 @@ void WebServer::treatResponse(int clientPos, int pollPos)
 
 		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
 
+		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
+		std::cout << "CLOSE CONNECTION da Response" << std::endl;
 		this->closeConnection(pollPos);
 		this->_Clients.erase(this->_Clients.begin() + clientPos);
 	}

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/25 22:43:21 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 22:27:32 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ std::string Response::readData(const std::string& uri)
         for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
             if (_client.getServerConfigs().getLocations()[i].getPath() == uri) {
                 path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
-                std::cout << path << std::endl;
+//              std::cout << path << std::endl;
 				break;
             }
         }
@@ -164,15 +164,15 @@ void Response::handleGET()
 
 void Response::handlePOST()
 {
-    std::vector<std::string> bodyData = _client.getRequest().getRequestBody();
+	std::string bodyData = _client.getRequest().getNewRequestBody();
 //    for (size_t i = 0; i < bodyData.size(); i++) {
 //        std::cout << "BODY: " << bodyData[i] << "\n";
 //    }
 	
     std::string uri = _client.getRequest().getUri();
-    std::cout << "PROCURANDO URI: " << uri << "\n";
+//	std::cout << "PROCURANDO URI: " << uri << "\n";
 	
-    if (_client.getRequest().getRequestBody().empty()) {
+    if (_client.getRequest().getNewRequestBody().empty()) {
         setStatus(400);
         setHeader("400 Bad Request", "text/plain");
         _body = "400 Bad Request: No request body found";
@@ -180,7 +180,7 @@ void Response::handlePOST()
     }
     
     CgiHandler post_cgi = CgiHandler(_client.getRequest());
-    std::cout << "ANTES DO CGIHANDLER\n";
+//    std::cout << "ANTES DO CGIHANDLER\n";
     post_cgi.postCgi(_client);
     setStatus(200);
     send();
@@ -189,11 +189,11 @@ void Response::handlePOST()
 void Response::httpMethods()
 {
     if (_client.getRequest().getMethod() == "GET") {
-		std::cout << "Handle get" << std::endl;
+//		std::cout << "Handle get" << std::endl;
 		handleGET();
 	}
     else if (_client.getRequest().getMethod() == "POST") {
-		std::cout << "HANDLE POST" << std::endl;
+//		std::cout << "HANDLE POST" << std::endl;
         handlePOST();
     }
     else {

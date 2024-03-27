@@ -1,0 +1,13 @@
+/home/amenesca/Documents/Workspace/WebServer/Weaaboos-Server-2.0/cgi-bin/get_file.py:3: DeprecationWarning: 'cgi' is deprecated and slated for removal in Python 3.13
+  import cgi
+Traceback (most recent call last):
+  File "/home/amenesca/Documents/Workspace/WebServer/Weaaboos-Server-2.0/cgi-bin/get_file.py", line 6, in <module>
+    form = cgi.FieldStorage()
+           ^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/cgi.py", line 493, in __init__
+    self.read_single()
+  File "/usr/lib/python3.11/cgi.py", line 686, in read_single
+    self.read_binary()
+  File "/usr/lib/python3.11/cgi.py", line 708, in read_binary
+    self.file.write(data)
+TypeError: write() argument must be str, not bytes

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:22:56 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:47:18 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,6 @@ class RequestParser
 		std::string 						_httpVersion;
 		std::string 						_portNumber;
 		std::string 						_queryString;
-		std::vector<std::string> 			_requestBody;
 		std::string							_newRequestBody;
 		std::map<std::string, std::string>	_requestHeaders;
 
@@ -59,7 +58,6 @@ class RequestParser
 		std::string 						getMethod() const ;
 		std::string 						getUri() const;
 		std::string							getHttpVersion() const;
-		std::vector<std::string>			getRequestBody() const;
 		std::map<std::string, std::string>	getHeaders() const;
 		std::string							getPortNumber() const;
 		std::string							getQueryString();

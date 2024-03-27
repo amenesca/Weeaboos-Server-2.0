@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:26:16 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:57:20 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -204,7 +204,7 @@ short int	Client::receiveRequest(int client)
 		return false;
 	}
 	
-	std::cout << buffer << "\nFim do buffer\n" << std::endl;
+//	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
@@ -228,7 +228,7 @@ short int	Client::receiveRequest(int client)
 
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
-			std::cout << "NewBody:\n" << this->_requestParser.getNewRequestBody() << std::endl;
+//			std::cout << "NewBody:\n" << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
@@ -244,7 +244,7 @@ short int	Client::receiveRequest(int client)
 		
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
-			std::cout << this->_requestParser.getNewRequestBody() << std::endl;
+//			std::cout << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
