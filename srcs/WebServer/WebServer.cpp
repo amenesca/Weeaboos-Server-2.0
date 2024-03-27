@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 22:48:13 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 16:45:42 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,11 +174,13 @@ void	WebServer::StartServer(void)
 		{
 			if (_pollFds[j].revents & POLLIN)
 			{
-				treatRequest(j - this->_nbrServers, j);
+				if (treatRequest(j - this->_nbrServers, j) == -1)
+					j--;
 			}
 			else if (_pollFds[j].revents & POLLOUT)
 			{
-				treatResponse(j - this->_nbrServers, j);
+				if (treatResponse(j - this->_nbrServers, j) == -1)
+					j--;
 			}
 			else if(isPollError(j))
 			{
@@ -230,7 +232,7 @@ void	WebServer::openNewConnection(int i)
 	this->_Clients.push_back(newClient);
 }
 
-void	WebServer::treatRequest(int clientPos, int pollPos)
+short int	WebServer::treatRequest(int clientPos, int pollPos)
 {
 	short int errorOnRecv;
 	// checar se a request já foi lida totalmente;
@@ -241,13 +243,18 @@ void	WebServer::treatRequest(int clientPos, int pollPos)
 		if (!errorOnRecv)
 		{
 			std::cout << "Close Connection da Request" << std::endl;
-			this->closeConnection(pollPos);
+			std::cout << "Fechando socket numero: " << this->_Clients[clientPos].getClientSocket() << std::endl;
+			close(this->_Clients[clientPos].getClientSocket());
+			this->_pollFds.erase(this->_pollFds.begin() + pollPos);
 			this->_Clients.erase(this->_Clients.begin() + clientPos);
+			return -1;
 		}
+		return 0;
 	}
+	return 0;
 }
 
-void WebServer::treatResponse(int clientPos, int pollPos)
+short int	WebServer::treatResponse(int clientPos, int pollPos)
 {
 	if (_Clients[clientPos].getRequestRead())
 	{
@@ -257,14 +264,17 @@ void WebServer::treatResponse(int clientPos, int pollPos)
 
 		std::string response = makeResponse.getHttpMessage();
 
-		std::cout << response << std::endl;
+//		std::cout << response << std::endl;
 
 		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
 
 		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
 		std::cout << "CLOSE CONNECTION da Response" << std::endl;
-		this->closeConnection(pollPos);
+		std::cout << "Fechando socket numero: " << this->_Clients[clientPos].getClientSocket() << std::endl;
+		close(this->_Clients[clientPos].getClientSocket());
+		this->_pollFds.erase(this->_pollFds.begin() + pollPos);
 		this->_Clients.erase(this->_Clients.begin() + clientPos);
+		return -1;
 	}
-
+	return 0;
 }
