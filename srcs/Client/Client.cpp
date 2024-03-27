@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:57:20 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 16:56:52 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ Client::Client() :
 
 Client::~Client()
 {
-	this->_clientSocket = -1;
+//	this->_clientSocket = -1;
 	this->_client_addr_len = 0;
 	memset(&this->_client_addr,0,sizeof(this->_client_addr));
 	_requestRead = false;

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/23 18:37:56 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/27 16:38:08 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,12 +49,12 @@ class WebServer
 		void	closeConnection(int index);
 		void	closeAllConnections(void);
 		
-		void	StartServer(void);
-		bool	isPollError(int i);
-		bool	verifyPollStatus(void);
-		void	openNewConnection(int i);
-		void	treatRequest(int clientPos, int pollPos);
-		void	treatResponse(int clientPos, int pollPos);
+		void		StartServer(void);
+		bool		isPollError(int i);
+		bool		verifyPollStatus(void);
+		void		openNewConnection(int i);
+		short int	treatRequest(int clientPos, int pollPos);
+		short int	treatResponse(int clientPos, int pollPos);
 
 		
 };
