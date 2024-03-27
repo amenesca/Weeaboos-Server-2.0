@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/23 18:33:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 22:04:04 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int CgiHandler::postCgi(Client client)
 
 	antiBlock(_request_pipe, response_pipe);
 	
-	if (!writePipes(_request.getRequestBody())) {
+	if (!writePipes(_request.getNewRequestBody())) {
         return (1);
 	}
 
@@ -246,23 +246,21 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-bool CgiHandler::writePipes(std::vector<std::string> body)
+bool        CgiHandler::writePipes(std::string message)
 {
-    std::string message;
-	
-    for (size_t i = 0; i < body.size(); ++i) {
-        message += body[i];
-        message += '\n';
-    }
+    size_t  bytesWritten;
+    int bytes;
 
-    ssize_t bytesWritten = write(_request_pipe[1], message.c_str(), message.size());
-    if (bytesWritten == -1) {
-        return (false);
+    bytesWritten = 0;
+    while (bytesWritten < message.length())
+    {
+        bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, \
+                    message.length() - bytesWritten);
+        if (bytes == -1)
+        {
+            return (false);
+        }
+        bytesWritten += bytes;
     }
-
-    if (static_cast<size_t>(bytesWritten) != message.size()) {
-        return (false);
-    }
-
     return (true);
 }

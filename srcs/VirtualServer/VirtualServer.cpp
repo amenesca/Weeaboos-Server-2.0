@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:26:32 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 22:31:11 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -236,7 +236,7 @@ int						VirtualServer::acceptCon(void) const
 
 void					VirtualServer::closeCon(void)
 {
-	if (this->_fd_socket >= 0)
+	if (this->_fd_socket > 0)
 	{
 		close(this->_fd_socket);
 		this->_fd_socket = -1;
