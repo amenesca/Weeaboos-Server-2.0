@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/25 22:43:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:26:16 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,12 +168,12 @@ void Client::setFirstTimeRequest(const bool& firstTimeRequest)
 	this->_firstTimeRequest = firstTimeRequest;
 }
 
-std::string Client::uint8_to_string(const uint8_t* data, size_t size)
+std::string Client::u_int8_to_string(const u_int8_t* data, size_t size)
 {
     return std::string(reinterpret_cast<const char*>(data), size);
 }
 
-int Client::countBytesUntilCRLF(const uint8_t* data, int dataSize) const
+int Client::countBytesUntilCRLF(const u_int8_t* data, int dataSize) const
 {
     int count = 0;
     for (int i = 0; i < dataSize - 3; ++i)
@@ -189,11 +189,11 @@ int Client::countBytesUntilCRLF(const uint8_t* data, int dataSize) const
 
 short int	Client::receiveRequest(int client)
 {
-	uint8_t	buffer[4096];
+	u_int8_t	buffer[4096];
 	int		bytes;
 	ssize_t	headerBytes;
 
-	memset(buffer, 0, sizeof(uint8_t) * 4096);
+	memset(buffer, 0, sizeof(u_int8_t) * 4096);
 
 	bytes = recv(client, buffer, 4095, 0);
 	if (bytes == -1)
@@ -208,7 +208,7 @@ short int	Client::receiveRequest(int client)
 	
 	if (this->_firstTimeRequest == true)
 	{
-		this->_requestParser.parse(uint8_to_string(buffer, bytes));
+		this->_requestParser.parse(u_int8_to_string(buffer, bytes));
 	}
 
 	if (this->_requestParser.getMethod() == "GET" \
@@ -223,8 +223,12 @@ short int	Client::receiveRequest(int client)
 		headerBytes = countBytesUntilCRLF(buffer, bytes);
 		_totalBodyBytes += bytes - headerBytes;
 
+		// fazer função nova para fazer append da posição do fim dos headers(inicio do body) na string newRequestBody
+		this->_requestParser.startBody(bytes, headerBytes, buffer); //feito
+
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
+			std::cout << "NewBody:\n" << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
@@ -233,13 +237,14 @@ short int	Client::receiveRequest(int client)
 	if (this->_requestParser.getMethod() == "POST" && \
 		this->_firstTimeRequest == false)
 	{
-		this->_requestParser.appendBody(uint8_to_string(buffer, bytes));
+		this->_requestParser.appendBody(buffer, bytes);
 		this->_totalBodyBytes += bytes;
 //		std::cout << "Contagem total dos bytes: " << this->_totalBodyBytes << std::endl;
 //		std::cout << "Content Lenght requerido: " << this->_requestParser.getContentLenght() << std::endl;
 		
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
+			std::cout << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
