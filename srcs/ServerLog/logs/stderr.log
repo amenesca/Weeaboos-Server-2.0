@@ -1,2 +1,0 @@
-/home/amenesca/Documents/Workspace/WebServer/Weaaboos-Server-2.0/cgi-bin/get_file.py:3: DeprecationWarning: 'cgi' is deprecated and slated for removal in Python 3.13
-  import cgi

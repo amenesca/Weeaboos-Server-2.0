@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/26 22:04:04 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/28 16:56:51 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ CgiHandler::CgiHandler() :
 	_env(),
 	_request_pipe(),
 	_request(),
+	_client(),
 	_log()
 {
 	_env = std::vector<char*>();
@@ -30,6 +31,7 @@ CgiHandler::CgiHandler(RequestParser request) :
 	_env(),
 	_request_pipe(),
 	_request(request),
+	_client(),
 	_log()
 {
 
@@ -50,7 +52,10 @@ CgiHandler& CgiHandler::operator=(const CgiHandler& src)
 		this->_request_pipe[0] = src.getRequestPipe1();
 		this->_request_pipe[1] = src.getRequestPipe2();
 		this->_request = src.getRequest();
+		this->_client = src.getClient();
 		this->_log = src.getLog();
+		this->_start_time = src._start_time;
+		this->_active = src._active;
 	}
 	return *this;
 }
@@ -78,6 +83,11 @@ int		CgiHandler::getRequestPipe2() const
 RequestParser 		CgiHandler::getRequest() const
 {
 	return this->_request;
+}
+
+Client 		CgiHandler::getClient() const
+{
+	return this->_client;
 }
 
 ServerLog		CgiHandler::getLog() const
@@ -168,12 +178,12 @@ int CgiHandler::postCgi(Client client)
 
 	antiBlock(_request_pipe, response_pipe);
 	
-	if (!writePipes(_request.getNewRequestBody())) {
+	if (!writePipes(_request.getNewRequestBody(), _request.getNewRequestBody().length())) {
         return (1);
 	}
 
 	_pid = fork();
-
+	_active = true;
 	if (_pid == -1)
 	{
 		std::cerr << "Error on fork: " << strerror(errno) << std::endl;
@@ -225,6 +235,10 @@ int CgiHandler::postCgi(Client client)
 	{
 		close(_request_pipe[0]);
 		close(response_pipe[1]);
+		if (!checkAvailability(response_pipe[0]))
+		{
+			return (-1);
+		}
 		return (1);
 	}
 	return (0);
@@ -246,10 +260,10 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-bool        CgiHandler::writePipes(std::string message)
+/*bool        CgiHandler::writePipes(std::string message)
 {
     size_t  bytesWritten;
-    int bytes;
+    ssize_t bytes;
 
     bytesWritten = 0;
     while (bytesWritten < message.length())
@@ -263,4 +277,64 @@ bool        CgiHandler::writePipes(std::string message)
         bytesWritten += bytes;
     }
     return (true);
+}*/
+
+bool CgiHandler::writePipes(std::string message, size_t contentLength)
+{
+    size_t bytesWritten = 0;
+    size_t bufferSize = 4096; // Tamanho do buffer para cada parte da imagem
+    while (bytesWritten < contentLength)
+    {
+        size_t bytesToWrite = std::min(bufferSize, contentLength - bytesWritten);
+        ssize_t bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, bytesToWrite);
+        if (bytes == -1)
+        {
+            return false;
+        }
+        bytesWritten += bytes;
+    }
+    return true;
+}
+
+int	CgiHandler::readPipes(int fd)
+{
+    char    buffer[BUFFER_SIZE_CGI];
+    int     bytesRead;
+
+    bytesRead = read(fd, buffer, sizeof(buffer));
+    if (bytesRead > 0)
+    {
+        this->_response.append(buffer, bytesRead);
+        return (bytesRead);
+    }
+    else
+    {
+        return (0);
+    }
+}
+
+bool CgiHandler::checkAvailability(int fd)
+{
+    time_t startTime = time(NULL);
+    time_t currentTime;
+    int bytes;
+
+    while (this->_active)
+    {
+        currentTime = time(NULL);
+        if (difftime(currentTime, startTime) >= TIME_LIMIT)
+        {
+            kill(this->_pid, SIGKILL);
+            this->_active = false;
+            return (false);
+        }
+        bytes = readPipes(fd);
+        if (bytes > 0)
+        {
+            this->_active = false;
+            return true;
+        }
+		usleep(10000);
+    }
+    return true;
 }
