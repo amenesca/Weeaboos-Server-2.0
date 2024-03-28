@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/28 16:56:51 by femarque         ###   ########.fr       */
+/*   Updated: 2024/03/28 16:59:31 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -336,5 +336,5 @@ bool CgiHandler::checkAvailability(int fd)
         }
 		usleep(10000);
     }
-    return true;
+    return (true);
 }
