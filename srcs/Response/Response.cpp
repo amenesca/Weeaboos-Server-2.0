@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/01 13:40:29 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/01 19:07:29 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ std::string Response::readData(const std::string& uri)
         for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
             if (_client.getServerConfigs().getLocations()[i].getPath() == uri) {
                 path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
-//              std::cout << path << std::endl;
+                std::cout << "PATH FORMADO: " << path << std::endl;
 				break;
             }
         }
@@ -128,6 +128,7 @@ std::string Response::readData(const std::string& uri)
     else {
         path = _client.getServerConfigs().getRoot() + uri + _client.getServerConfigs().getLocations()[0].getIndex()[1];
 	}
+    std::cout << "PATH RESPONSE: " << path << std::endl;
     std::ifstream file(path.c_str());
     if (!file.is_open()) {
 		std::cout << "Error opening index.html" << std::endl;
@@ -149,10 +150,10 @@ void Response::handleGET()
 	std::cout << "Valor da URI: " << uri << std::endl;
     std::string	data = readData(uri);
      if (!data.empty()) {
+        _body = readData(uri);
         CgiHandler get_cgi = CgiHandler(_client.getRequest());
         get_cgi.getCgi(_client);
         setStatus(200);
-        _body = readData(uri);
         setHeader("200 OK", "text/html");
         send();
     }

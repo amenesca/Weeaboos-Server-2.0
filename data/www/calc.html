@@ -1,21 +1,40 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora</title>
 </head>
 <body>
-    <h2>Calculadora</h2>
-    <form action="/cgi-bin" method="get">
-        <input type="hidden" name="path" value="/cgi-bin/calc.py">
-        <input type="number" name="num1" placeholder="Número 1" required>
-        <select name="operation">
-            <option value="add">+</option>
-            <option value="subtract">-</option>
-            <option value="multiply">*</option>
-            <option value="divide">/</option>
-        </select>
-        <input type="number" name="num2" placeholder="Número 2" required>
-        <input type="submit" value="Calcular">
+    <h1>Calculadora</h1>
+    <form id="calculator" method="GET" action="./cgi-bin/calc.py">
+        <input type="text" id="expression" name="expression" readonly>
+        <br>
+        <button type="button" onclick="appendToExpression('7')">7</button>
+        <button type="button" onclick="appendToExpression('8')">8</button>
+        <button type="button" onclick="appendToExpression('9')">9</button>
+        <button type="button" onclick="appendToExpression('/')">/</button>
+        <br>
+        <button type="button" onclick="appendToExpression('4')">4</button>
+        <button type="button" onclick="appendToExpression('5')">5</button>
+        <button type="button" onclick="appendToExpression('6')">6</button>
+        <button type="button" onclick="appendToExpression('*')">*</button>
+        <br>
+        <button type="button" onclick="appendToExpression('1')">1</button>
+        <button type="button" onclick="appendToExpression('2')">2</button>
+        <button type="button" onclick="appendToExpression('3')">3</button>
+        <button type="button" onclick="appendToExpression('-')">-</button>
+        <br>
+        <button type="button" onclick="appendToExpression('0')">0</button>
+        <button type="button" onclick="appendToExpression('.')">.</button>
+        <button type="submit">=</button>
+        <button type="button" onclick="appendToExpression('+')">+</button>
     </form>
+
+    <script>
+        function appendToExpression(value) {
+            document.getElementById('expression').value += value;
+        }
+    </script>
 </body>
 </html>

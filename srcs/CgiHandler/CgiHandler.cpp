@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/01 13:26:00 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/01 17:46:43 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,8 +176,11 @@ int CgiHandler::getCgi(Client client)
 	{
 		std::vector<char*> argv;
 		std::string path;
-		path = _request.getUri().substr(1);
+		std::string root = _client.getServerConfigs().getRoot();
+		path = root + _request.getUri().substr(1);
 		std::cout << "PATH: " << path << std::endl;
+		std::string querry = extractQueryString(_request.getUri());
+		std::cout << "QUERY: " << querry << std::endl;
 		argv.push_back(strdup(path.c_str()));
 		argv.push_back(NULL);
 		if (close(response_pipe[0]) == -1) {
