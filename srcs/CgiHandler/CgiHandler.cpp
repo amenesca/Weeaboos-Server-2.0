@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/28 16:59:31 by femarque         ###   ########.fr       */
+/*   Updated: 2024/03/31 15:31:44 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,9 +154,59 @@ std::string CgiHandler::extractQueryString(const std::string& uri)
     return (queryString);
 }
 
-int CgiHandler::getCgi()
+int CgiHandler::getCgi(Client client)
 {
-	//decidir o que fazer no get
+	int response_pipe[2];
+	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
+
+	if (pipe(response_pipe) == -1)
+    {
+        std::cerr << "Error creating pipe: " << strerror(errno) << std::endl;
+    	exit(1);
+    }
+
+	_pid = fork();
+	_active = true;
+	if (_pid == -1)
+	{
+		std::cerr << "Error on fork: " << strerror(errno) << std::endl;
+		exit (1);
+	}
+	else if (_pid == 0)
+	{
+		if (close(response_pipe[0]) == -1) {
+  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		if (dup2(response_pipe[1], STDOUT_FILENO) == -1) {
+  			std::cerr << "Error on dup2: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		if (close(response_pipe[1]) == -1) {
+  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		_log.createLog();
+		std::vector<char*> argv;
+		std::string path;
+		path = _request.getUri().substr(1);
+		argv.push_back(strdup(path.c_str()));
+		argv.push_back(NULL);
+		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
+			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+		return (0);
+	}
+	else
+	{
+		close(response_pipe[1]);
+		if (!checkAvailability(response_pipe[0]))
+		{
+			return (-1);
+		}
+		return (1);
+	}
 	return (0);
 }
 

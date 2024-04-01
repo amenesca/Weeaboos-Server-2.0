@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/27 19:38:20 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/31 15:42:51 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,6 +149,8 @@ void Response::handleGET()
 //	std::cout << "Valor da URI" << uri << std::endl;
     std::string	data = readData(uri);
      if (!data.empty()) {
+        CgiHandler get_cgi = CgiHandler(_client.getRequest());
+        get_cgi.getCgi(_client);
         setStatus(200);
         _body = readData(uri);
         setHeader("200 OK", "text/html");

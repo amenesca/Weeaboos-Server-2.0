@@ -40,7 +40,7 @@ class CgiHandler {
         
         std::vector<char*>  createEnv(std::map<std::string, std::string> requestHeaders, Client client);
         std::string         extractQueryString(const std::string& uri);
-        int                 getCgi();
+        int                 getCgi(Client client);
         int                 postCgi(Client client);
 		std::string         getScriptFilename(const std::string& requestURI);
 };
