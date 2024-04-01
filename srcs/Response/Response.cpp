@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/31 15:42:51 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/01 13:40:29 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ std::string Response::readData(const std::string& uri)
 void Response::handleGET()
 {
     std::string	uri = _client.getRequest().getUri();
-//	std::cout << "Valor da URI" << uri << std::endl;
+	std::cout << "Valor da URI: " << uri << std::endl;
     std::string	data = readData(uri);
      if (!data.empty()) {
         CgiHandler get_cgi = CgiHandler(_client.getRequest());
@@ -170,7 +170,7 @@ void Response::handlePOST()
 //	std::cout << bodyData << "\nBody Printado"<< std::endl;
 	
     std::string uri = _client.getRequest().getUri();
-//	std::cout << "PROCURANDO URI: " << uri << "\n";
+	std::cout << "PROCURANDO URI: " << uri << "\n";
 	
     if (_client.getRequest().getNewRequestBody().empty()) {
         setStatus(400);

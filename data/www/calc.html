@@ -5,7 +5,8 @@
 </head>
 <body>
     <h2>Calculadora</h2>
-    <form action="./cgi-bin/calc.py" method="get">
+    <form action="/cgi-bin" method="get">
+        <input type="hidden" name="path" value="/cgi-bin/calc.py">
         <input type="number" name="num1" placeholder="Número 1" required>
         <select name="operation">
             <option value="add">+</option>

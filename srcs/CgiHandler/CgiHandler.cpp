@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/31 15:31:44 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/01 13:26:00 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -174,6 +174,12 @@ int CgiHandler::getCgi(Client client)
 	}
 	else if (_pid == 0)
 	{
+		std::vector<char*> argv;
+		std::string path;
+		path = _request.getUri().substr(1);
+		std::cout << "PATH: " << path << std::endl;
+		argv.push_back(strdup(path.c_str()));
+		argv.push_back(NULL);
 		if (close(response_pipe[0]) == -1) {
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
@@ -187,11 +193,7 @@ int CgiHandler::getCgi(Client client)
   			exit(1);
 		}
 		_log.createLog();
-		std::vector<char*> argv;
-		std::string path;
-		path = _request.getUri().substr(1);
-		argv.push_back(strdup(path.c_str()));
-		argv.push_back(NULL);
+		
 		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
 			exit(1);
