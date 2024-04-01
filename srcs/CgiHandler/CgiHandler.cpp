@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/03/26 22:04:04 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/01 16:02:46 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int CgiHandler::postCgi(Client client)
 
 	antiBlock(_request_pipe, response_pipe);
 	
-	if (!writePipes(_request.getNewRequestBody())) {
+	if (!writePipes(_request.getNewRequestBody(), _request.getContentLenght())) {
         return (1);
 	}
 
@@ -246,21 +246,46 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-bool        CgiHandler::writePipes(std::string message)
+bool        CgiHandler::writePipes(std::string message, int contentLength)
 {
-    size_t  bytesWritten;
-    int bytes;
+    ssize_t	bytesWritten = 0;
+	ssize_t bytesLeftToWrite = static_cast<ssize_t>(contentLength);
+	ssize_t totalBytesWritten = 0;
+	ssize_t	sizeToWrite = 4096;
 
-    bytesWritten = 0;
-    while (bytesWritten < message.length())
-    {
-        bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, \
-                    message.length() - bytesWritten);
-        if (bytes == -1)
-        {
-            return (false);
-        }
-        bytesWritten += bytes;
+	if (static_cast<ssize_t>(contentLength) < sizeToWrite)
+	{
+		sizeToWrite = contentLength;
+	}
+	std::cout << "CONTENT LENGTH NO WRITE PIPES: " << contentLength << std::endl;
+
+	while (bytesLeftToWrite != 0)
+	{
+  		bytesWritten = write(_request_pipe[1], message.c_str() + totalBytesWritten, sizeToWrite);
+		
+		if (bytesWritten == -1)
+			break;
+		
+		bytesLeftToWrite -= bytesWritten;
+		totalBytesWritten += bytesWritten;
+		if (bytesLeftToWrite < 4096)
+		{
+			sizeToWrite = 	bytesLeftToWrite;
+		}
+		std::cout << "BYTESWRITTEN NO WRITE PIPES: " << bytesWritten << std::endl;
+	}
+	std::cout << "TOTAL BYTESWRITTEN NO WRITE PIPES: " << totalBytesWritten << std::endl;
+    if (bytesWritten == -1)
+	{
+		std::cout << "Bytes Writen == -1" << std::endl;
+        return (false);
     }
+
+    if (static_cast<size_t>(totalBytesWritten) != message.size())
+	{
+		std::cout << "Bytes Writen != message.size()" << std::endl;
+        return (false);
+    }
+
     return (true);
 }

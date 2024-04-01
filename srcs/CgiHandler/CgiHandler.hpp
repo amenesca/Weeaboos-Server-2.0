@@ -11,7 +11,7 @@ class CgiHandler {
         RequestParser       _request;
         ServerLog           _log;
         void                antiBlock(int *pipe1, int *pipe2);
-        bool                writePipes(std::string message);
+        bool                writePipes(std::string message, int contentLength);
 	public:
         CgiHandler();
         CgiHandler(RequestParser request);
