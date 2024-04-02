@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/01 19:07:29 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/02 15:39:53 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,23 +115,37 @@ void Response::send() {
 std::string Response::readData(const std::string& uri)
 {
     std::string path;
-	// Mudei um monte de coisa pq a config vem do cliente!!!
+    std::string uri_without_query;
+
+    // Encontra a posição do caractere '?'
+    size_t pos = uri.find('?');
+
+    // Se '?' foi encontrado, extrai a parte da URI antes dele
+    if (pos != std::string::npos) {
+        uri_without_query = uri.substr(0, pos);
+    } else {
+        uri_without_query = uri; // Se não houver '?', usa a URI completa
+    }
+
+    // Resto do código permanece o mesmo, usando uri_without_query
+
     if (_client.getServerConfigs().getLocations().size() > 1) {
         for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
-            if (_client.getServerConfigs().getLocations()[i].getPath() == uri) {
+			std::cout << "Path da location: " << _client.getServerConfigs().getLocations()[i].getPath() << std::endl;
+			std::cout << "Uri sem query: " << uri_without_query << std::endl;
+            if (_client.getServerConfigs().getLocations()[i].getPath() == uri_without_query) {
                 path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
                 std::cout << "PATH FORMADO: " << path << std::endl;
-				break;
+                break;
             }
         }
+    } else {
+        path = _client.getServerConfigs().getRoot() + uri_without_query + _client.getServerConfigs().getLocations()[0].getIndex()[1];
     }
-    else {
-        path = _client.getServerConfigs().getRoot() + uri + _client.getServerConfigs().getLocations()[0].getIndex()[1];
-	}
     std::cout << "PATH RESPONSE: " << path << std::endl;
     std::ifstream file(path.c_str());
     if (!file.is_open()) {
-		std::cout << "Error opening index.html" << std::endl;
+        std::cout << "Error opening index.html" << std::endl;
         return ("");
     }
     std::string data;
