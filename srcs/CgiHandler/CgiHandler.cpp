@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 15:29:19 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/02 16:15:50 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,6 +154,22 @@ std::string CgiHandler::extractQueryString(const std::string& uri)
     return (queryString);
 }
 
+std::string UriWithoutQuery(const std::string& uri)
+{
+	    std::string uri_without_query;
+
+    // Encontra a posição do caractere '?'
+    size_t pos = uri.find('?');
+
+    // Se '?' foi encontrado, extrai a parte da URI antes dele
+    if (pos != std::string::npos) {
+        uri_without_query = uri.substr(0, pos);
+    } else {
+        uri_without_query = uri; // Se não houver '?', usa a URI completa
+    }
+	return uri_without_query;
+}
+
 int CgiHandler::getCgi(Client client)
 {
 	int response_pipe[2];
@@ -177,7 +193,7 @@ int CgiHandler::getCgi(Client client)
 		std::vector<char*> argv;
 		std::string path;
 		std::string root = client.getServerConfigs().getRoot();
-		path = root + "/" + _request.getUri().substr(1);
+		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
 		std::cout << "PATH: " << path << std::endl;
 		std::string querry = extractQueryString(_request.getUri());
 		std::cout << "QUERY: " << querry << std::endl;
