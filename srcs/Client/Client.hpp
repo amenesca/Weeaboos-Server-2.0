@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:23:41 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/28 16:20:45 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 
 # include "../VirtualServer/VirtualServer.hpp"
 # include "../RequestParser/RequestParser.hpp"
+# include <ctime>
 
 class Client
 {
@@ -29,6 +30,7 @@ class Client
 		VirtualServer		_serverConfigs;
 		RequestParser		_requestParser;
 		ssize_t				_totalBodyBytes;
+		time_t				_start_time;
 		
     public:
         Client();
@@ -47,6 +49,7 @@ class Client
 		bool			getRequestRead(void) const;
 		bool			getFirstTimeRequest(void) const;
 		ssize_t			getTotalBodyBytes(void) const;
+		const time_t&	getStartTime(void) const;
 		
         sockaddr_in	*getClientAddrPointer(void);
         socklen_t	*getClientAddrLenPointer(void);
@@ -60,6 +63,7 @@ class Client
 		void		setRequest(const RequestParser& request);
 		void		setRequestRead(const bool& requestRead);
 		void		setFirstTimeRequest(const bool& firstTimeRequest);
+		void		setStart_time(time_t start_time);
 
 		short int	receiveRequest(int client);
 		std::string u_int8_to_string(const uint8_t* data, size_t size);

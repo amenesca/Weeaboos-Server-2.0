@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/01 16:02:46 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/02 16:15:50 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ CgiHandler::CgiHandler() :
 	_env(),
 	_request_pipe(),
 	_request(),
+	_client(),
 	_log()
 {
 	_env = std::vector<char*>();
@@ -30,6 +31,7 @@ CgiHandler::CgiHandler(RequestParser request) :
 	_env(),
 	_request_pipe(),
 	_request(request),
+	_client(),
 	_log()
 {
 
@@ -50,7 +52,10 @@ CgiHandler& CgiHandler::operator=(const CgiHandler& src)
 		this->_request_pipe[0] = src.getRequestPipe1();
 		this->_request_pipe[1] = src.getRequestPipe2();
 		this->_request = src.getRequest();
+		this->_client = src.getClient();
 		this->_log = src.getLog();
+		this->_start_time = src._start_time;
+		this->_active = src._active;
 	}
 	return *this;
 }
@@ -78,6 +83,11 @@ int		CgiHandler::getRequestPipe2() const
 RequestParser 		CgiHandler::getRequest() const
 {
 	return this->_request;
+}
+
+Client 		CgiHandler::getClient() const
+{
+	return this->_client;
 }
 
 ServerLog		CgiHandler::getLog() const
@@ -144,9 +154,80 @@ std::string CgiHandler::extractQueryString(const std::string& uri)
     return (queryString);
 }
 
-int CgiHandler::getCgi()
+std::string UriWithoutQuery(const std::string& uri)
 {
-	//decidir o que fazer no get
+	    std::string uri_without_query;
+
+    // Encontra a posição do caractere '?'
+    size_t pos = uri.find('?');
+
+    // Se '?' foi encontrado, extrai a parte da URI antes dele
+    if (pos != std::string::npos) {
+        uri_without_query = uri.substr(0, pos);
+    } else {
+        uri_without_query = uri; // Se não houver '?', usa a URI completa
+    }
+	return uri_without_query;
+}
+
+int CgiHandler::getCgi(Client client)
+{
+	int response_pipe[2];
+	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
+
+	if (pipe(response_pipe) == -1)
+    {
+        std::cerr << "Error creating pipe: " << strerror(errno) << std::endl;
+    	exit(1);
+    }
+
+	_pid = fork();
+	_active = true;
+	if (_pid == -1)
+	{
+		std::cerr << "Error on fork: " << strerror(errno) << std::endl;
+		exit (1);
+	}
+	else if (_pid == 0)
+	{
+		std::vector<char*> argv;
+		std::string path;
+		std::string root = client.getServerConfigs().getRoot();
+		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
+		std::cout << "PATH: " << path << std::endl;
+		std::string querry = extractQueryString(_request.getUri());
+		std::cout << "QUERY: " << querry << std::endl;
+		argv.push_back(strdup(path.c_str()));
+		argv.push_back(NULL);
+		if (close(response_pipe[0]) == -1) {
+  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		if (dup2(response_pipe[1], STDOUT_FILENO) == -1) {
+  			std::cerr << "Error on dup2: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		if (close(response_pipe[1]) == -1) {
+  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
+  			exit(1);
+		}
+		_log.createLog();
+		
+		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
+			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+		return (0);
+	}
+	else
+	{
+		close(response_pipe[1]);
+		if (!checkAvailability(response_pipe[0]))
+		{
+			return (-1);
+		}
+		return (1);
+	}
 	return (0);
 }
 
@@ -168,12 +249,12 @@ int CgiHandler::postCgi(Client client)
 
 	antiBlock(_request_pipe, response_pipe);
 	
-	if (!writePipes(_request.getNewRequestBody(), _request.getContentLenght())) {
+	if (!writePipes(_request.getNewRequestBody(), _request.getNewRequestBody().length())) {
         return (1);
 	}
 
 	_pid = fork();
-
+	_active = true;
 	if (_pid == -1)
 	{
 		std::cerr << "Error on fork: " << strerror(errno) << std::endl;
@@ -225,6 +306,10 @@ int CgiHandler::postCgi(Client client)
 	{
 		close(_request_pipe[0]);
 		close(response_pipe[1]);
+		if (!checkAvailability(response_pipe[0]))
+		{
+			return (-1);
+		}
 		return (1);
 	}
 	return (0);
@@ -246,46 +331,81 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-bool        CgiHandler::writePipes(std::string message, int contentLength)
+/*bool        CgiHandler::writePipes(std::string message)
 {
-    ssize_t	bytesWritten = 0;
-	ssize_t bytesLeftToWrite = static_cast<ssize_t>(contentLength);
-	ssize_t totalBytesWritten = 0;
-	ssize_t	sizeToWrite = 4096;
+    size_t  bytesWritten;
+    ssize_t bytes;
 
-	if (static_cast<ssize_t>(contentLength) < sizeToWrite)
-	{
-		sizeToWrite = contentLength;
-	}
-	std::cout << "CONTENT LENGTH NO WRITE PIPES: " << contentLength << std::endl;
-
-	while (bytesLeftToWrite != 0)
-	{
-  		bytesWritten = write(_request_pipe[1], message.c_str() + totalBytesWritten, sizeToWrite);
-		
-		if (bytesWritten == -1)
-			break;
-		
-		bytesLeftToWrite -= bytesWritten;
-		totalBytesWritten += bytesWritten;
-		if (bytesLeftToWrite < 4096)
-		{
-			sizeToWrite = 	bytesLeftToWrite;
-		}
-		std::cout << "BYTESWRITTEN NO WRITE PIPES: " << bytesWritten << std::endl;
-	}
-	std::cout << "TOTAL BYTESWRITTEN NO WRITE PIPES: " << totalBytesWritten << std::endl;
-    if (bytesWritten == -1)
-	{
-		std::cout << "Bytes Writen == -1" << std::endl;
-        return (false);
+    bytesWritten = 0;
+    while (bytesWritten < message.length())
+    {
+        bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, \
+                    message.length() - bytesWritten);
+        if (bytes == -1)
+        {
+            return (false);
+        }
+        bytesWritten += bytes;
     }
+    return (true);
+}*/
 
-    if (static_cast<size_t>(totalBytesWritten) != message.size())
-	{
-		std::cout << "Bytes Writen != message.size()" << std::endl;
-        return (false);
+bool CgiHandler::writePipes(std::string message, size_t contentLength)
+{
+    size_t bytesWritten = 0;
+    size_t bufferSize = 4096; // Tamanho do buffer para cada parte da imagem
+    while (bytesWritten < contentLength)
+    {
+        size_t bytesToWrite = std::min(bufferSize, contentLength - bytesWritten);
+        ssize_t bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, bytesToWrite);
+        if (bytes == -1)
+        {
+            return false;
+        }
+        bytesWritten += bytes;
     }
+    return true;
+}
 
+int	CgiHandler::readPipes(int fd)
+{
+    char    buffer[BUFFER_SIZE_CGI];
+    int     bytesRead;
+
+    bytesRead = read(fd, buffer, sizeof(buffer));
+    if (bytesRead > 0)
+    {
+        this->_response.append(buffer, bytesRead);
+        return (bytesRead);
+    }
+    else
+    {
+        return (0);
+    }
+}
+
+bool CgiHandler::checkAvailability(int fd)
+{
+    time_t startTime = time(NULL);
+    time_t currentTime;
+    int bytes;
+
+    while (this->_active)
+    {
+        currentTime = time(NULL);
+        if (difftime(currentTime, startTime) >= TIME_LIMIT)
+        {
+            kill(this->_pid, SIGKILL);
+            this->_active = false;
+            return (false);
+        }
+        bytes = readPipes(fd);
+        if (bytes > 0)
+        {
+            this->_active = false;
+            return true;
+        }
+		usleep(10000);
+    }
     return (true);
 }

@@ -1,18 +1,106 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de POST Method</title>
-</head>
-<body>
-    <h2>Teste de POST Method</h2>
-    <form method="post" action="./cgi-bin/post.py" enctype="multipart/form-data">
-        <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome"><br>
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email"><br><br>
-        <input type="submit" value="Enviar">
-    </form>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Weeaboos WebServer</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Protest+Revolution&family=Sixtyfour&family=Workbench&display=swap" rel="stylesheet">
+    <!-- CSS RESET STYLES -->
+    <style>
+	/* 
+		http://meyerweb.com/eric/tools/css/reset/ 
+   		sv2.0 | 20110126
+   		License: none (public domain)
+	*/
+	a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,html,i,iframe,img,ins,kbd,label,legend,li,mark,menu,nav,object,ol,output,p,pre,q,ruby,s,samp,section,small,span,strike,strong,sub,summary,sup,table,tbody,td,tfoot,th,thead,time,tr,tt,u,ul,var,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:after,blockquote:before,q:after,q:before{content:"";content:none}table{border-collapse:collapse;border-spacing:0}</style>
+    <!-- ESTILOS DO SITE -->
+    <style>
+		body {
+			background-color: #0a0310;
+		}
+		header {
+			font-family: "Sixtyfour", sans-serif;
+			font-optical-sizing: auto;
+			font-weight: 400;
+			font-style: normal;
+			font-variation-settings:
+				"BLED" 0,
+				"SCAN" 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 50vh;
+			font-size: 80px;
+			color: #ff005b;
+		}
+		main {
+			position: absolute;
+			top: 40%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+
+		button {
+			font-family: "Workbench", sans-serif;
+  			font-optical-sizing: auto;
+  			font-weight: 400;
+  			font-style: normal;
+  			font-variation-settings:
+    			"BLED" 0,
+    			"SCAN" 0;
+			background: none;
+			border-radius: 0.6em;
+			color: #ff7d10;
+			border: 2px solid;
+			padding: 1em 2em;
+			font-size: 1em;
+			transition: all 0.25s;
+		}
+
+		button:hover {
+			color: #ffb238;
+			color: #ffb238;
+			box-shadow: 0 0.5em 3em -0.5em #ffb238;
+			transform: translateY(-0.25em);
+			cursor: pointer;
+		}
+
+		button:active {
+			transform: translateY(0.25em);
+			box-shadow: 0 0.5em 2em -0.5em #ffb238;
+		}
+
+		section {
+			display:flex;
+			position: absolute;
+			top: 70%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		section img {
+			height: 20rem;
+			width: auto;
+			border-radius: 50%;
+		}
+    </style>
+  </head>
+  <body>
+    <div>
+		<header>
+			<h1>Weeaboos WebServer</h1>
+		</header>
+    	<main>
+        	<a href="calc.html">Calculadora</a>
+        	<a href="imagem.html">Enviar Imagem</a>
+        	<a hred="index_form.html">Formulário</a>
+      </main>
+	  	<div class="carros-retrowaves">
+			<section>
+				<img src="images/cyberpunk-futuristic-retro-wave.png" alt="carro carro-retrowave">
+			</section>
+		</div>
+	</div>
+  </body>
 </html>

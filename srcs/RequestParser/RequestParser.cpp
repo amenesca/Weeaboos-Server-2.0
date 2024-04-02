@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/27 19:34:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/28 16:54:39 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -121,59 +121,6 @@ void RequestParser::parse(std::string request)
 	if (_requestMethod == "POST")
 	{
 		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Length"].c_str());
-    }
-    return;
-}
-
-void RequestParser::parse(void)
-{
-    // Declaring variables
-//	std::cout << "--- PARSER DA REQUEST ---" << std::endl;
-	
-    std::string requestLine, headerLine, bodyLine;
-    std::istringstream requestStream(this->_stringBuffer);
-
-    // Solicitation Line parsing
-    std::getline(requestStream, requestLine);
-    std::istringstream requestLineStream(requestLine);
-    requestLineStream >> this->_requestMethod >> this->_uri >> this->_httpVersion;
-
-    // Header parsing
-    while(std::getline(requestStream, headerLine) && headerLine != "\r\n")
-	{
-//		std::cout << "PRINTANDO HEADER LINE: " << headerLine << std::endl;
-        size_t separator = headerLine.find(": ");
-        if (separator != std::string::npos)
-		{
-            std::string key = headerLine.substr(0, separator);
-            std::string value = headerLine.substr(separator + 2); // + 2 para ignorar ": "
-
-            // Se a chave for "Host", extrair apenas o conteúdo antes do ":"
-            if (key == "Host")
-			{
-                size_t portSeparator = value.find(":");
-                if (portSeparator != std::string::npos)
-				{
-                    std::string hostWithoutPort = value.substr(0, portSeparator);
-					std::string portNumber = value.substr(portSeparator + 1);
-
-					value = hostWithoutPort;
-					_portNumber = portNumber;
-                }
-            }
-
-            this->_requestHeaders[key] = value;
-			if (headerLine.find("Sec-Fetch-User: ?1") != std::string::npos)
-			{
-//				std::cout << "Condição funcionou" << std::endl;
-				break;
-			}
-        }
-    }
-    // Body parsing
-	if (_requestMethod == "POST")
-	{
-		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Lenght"].c_str());
     }
     return;
 }
