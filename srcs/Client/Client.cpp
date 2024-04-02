@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/27 19:34:46 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/03/28 16:21:00 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,6 +123,16 @@ socklen_t *Client::getClientAddrLenPointer(void)
     return &_client_addr_len;
 }
 
+const time_t& Client::getStartTime(void) const
+{
+	return this->_start_time;
+}
+
+void	Client::setStart_time(time_t start_time)
+{
+	this->_start_time = start_time;
+}
+
 void Client::setRequestBuffer(const std::string& requestBuffer)
 {
     this->_requestBuffer = requestBuffer;
@@ -190,7 +200,7 @@ int Client::countBytesUntilCRLF(const u_int8_t* data, int dataSize) const
 short int	Client::receiveRequest(int client)
 {
 	u_int8_t	buffer[4096];
-	int		bytes;
+	ssize_t		bytes;
 	ssize_t	headerBytes;
 
 	memset(buffer, 0, sizeof(u_int8_t) * 4096);

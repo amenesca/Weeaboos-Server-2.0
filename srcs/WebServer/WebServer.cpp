@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/27 19:34:12 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/01 17:14:52 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,7 +217,8 @@ void	WebServer::openNewConnection(int i)
 {
 	int		newClientSocket;
 	Client	newClient = Client();
-
+	close(STDIN_FILENO);
+	open("/dev/null", O_RDONLY);
 	newClientSocket = accept(this->_vServers[i].getFdSocket(),\
 		reinterpret_cast<struct sockaddr*>(newClient.getClientAddrPointer()),\
 		newClient.getClientAddrLenPointer());
@@ -239,6 +240,7 @@ short int	WebServer::treatRequest(int clientPos, int pollPos)
 	if (!this->_Clients[clientPos].getRequestRead())
 	{
 		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
+		this->_Clients[clientPos].setStart_time(time(NULL));
 		errorOnRecv = this->_Clients[clientPos].receiveRequest(this->_pollFds[pollPos].fd);
 		if (!errorOnRecv)
 		{
