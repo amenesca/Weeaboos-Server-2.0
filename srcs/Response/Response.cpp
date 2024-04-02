@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 16:05:53 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/02 20:11:13 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,8 +131,8 @@ std::string Response::readData(const std::string& uri)
 
     if (_client.getServerConfigs().getLocations().size() > 1) {
         for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
-			std::cout << "Path da location: " << _client.getServerConfigs().getLocations()[i].getPath() << std::endl;
-			std::cout << "Uri sem query: " << uri_without_query << std::endl;
+            std::cout << "Path da location: " << _client.getServerConfigs().getLocations()[i].getPath() << std::endl;
+            std::cout << "Uri sem query: " << uri_without_query << std::endl;
             if (_client.getServerConfigs().getLocations()[i].getPath() == uri_without_query) {
                 path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
                 std::cout << "PATH FORMADO: " << path << std::endl;
@@ -142,62 +142,133 @@ std::string Response::readData(const std::string& uri)
     } else {
         path = _client.getServerConfigs().getRoot() + uri_without_query + _client.getServerConfigs().getLocations()[0].getIndex()[1];
     }
+
     std::cout << "PATH RESPONSE: " << path << std::endl;
-    std::ifstream file(path.c_str());
+
+    // Verifica se o recurso é um script CGI
+    if (isCGIScript(path)) {
+        return executeCGI(path);
+    } else {
+        return readStaticFile(path);
+    }
+}
+
+bool Response::isCGIScript(const std::string& path)
+{
+    // Verifica se o arquivo existe e é executável
+    return (access(path.c_str(), X_OK) == 0);
+}
+
+std::string Response::executeCGI(const std::string& scriptPath)
+{
+    int pipefd[2];
+    pipe(pipefd);
+
+    pid_t pid = fork();
+
+    if (pid == -1)
+    {
+        std::cerr << "Failed to fork" << std::endl;
+        exit(EXIT_FAILURE);
+    } 
+    else if (pid == 0)
+    {
+        std::cout << "Executando script CGI: " << scriptPath << std::endl;
+        if (access(scriptPath.c_str(), X_OK) == -1) {
+			std::cerr << "Error on access: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+        dup2(pipefd[1], STDOUT_FILENO);
+        close(pipefd[0]);
+
+        std::vector<char*> args;
+        args.push_back(strdup(scriptPath.c_str()));
+        //args.push_back(strdup(uri.c_str()));
+		args.push_back(NULL);
+        //char* args[] = {const_cast<char*>(scriptPath.c_str()), const_cast<char*>(uri.c_str()), NULL};
+        _log.createLog();
+        if (execve(scriptPath.c_str(), args.data(), NULL) == -1) {
+            std::cerr << "Failed to execute CGI script" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        std::cerr << "Failed to execute CGI script" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        // Estamos no processo pai
+
+        // Fecha o lado de escrita do pipe
+        close(pipefd[1]);
+
+        // Lê a saída do script CGI a partir do pipe
+        std::stringstream ss;
+        char buffer[4096];
+        ssize_t bytesRead;
+        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
+            ss.write(buffer, bytesRead);
+        }
+        waitpid(pid, NULL, 0);
+
+        return ss.str();
+    }
+}
+
+std::string Response::readStaticFile(const std::string& filePath)
+{
+    std::ifstream file(filePath.c_str());
     if (!file.is_open()) {
-        std::cout << "Error opening index.html" << std::endl;
-        return ("");
+        std::cerr << "Error opening file: " << filePath << std::endl;
+        return "";
     }
-    std::string data;
-    std::string line;
-    while (std::getline(file, line)) {
-        data += line;
-        data += "\n";
-    }
+
+    std::stringstream ss;
+    ss << file.rdbuf();
     file.close();
-    return (data);
+
+    return ss.str();
 }
 
 void Response::handleGET()
 {
-    std::string	uri = _client.getRequest().getUri();
-	std::cout << "Valor da URI: " << uri << std::endl;
-    std::string	data = readData(uri);
-     if (!data.empty()) {
-        _body = readData(uri);
-        CgiHandler get_cgi = CgiHandler(_client.getRequest());
-        get_cgi.getCgi(_client);
+    std::string uri = _client.getRequest().getUri();
+    std::cout << "Valor da URI: " << uri << std::endl;
+    std::string data = readData(uri);
+    if (!data.empty()) {
+        _body = data;
         setStatus(200);
         setHeader("200 OK", "text/html");
-        send();
-    }
-    else
-    {
+    } else {
         setStatus(404);
         setHeader("404 Not Found", "text/html");
         _body = "404 Not Found";
     }
+    send();
 }
 
 void Response::handlePOST()
 {
-	std::string bodyData = _client.getRequest().getNewRequestBody();
-//	std::cout << bodyData << "\nBody Printado"<< std::endl;
-	
+    std::string bodyData = _client.getRequest().getNewRequestBody();
     std::string uri = _client.getRequest().getUri();
-	std::cout << "PROCURANDO URI: " << uri << "\n";
-	
-    if (_client.getRequest().getNewRequestBody().empty()) {
+    std::string root = _client.getServerConfigs().getRoot();
+    std::string path = root + uri;
+    std::cout << "PATH HANDLE: " << path << "\n";
+    std::cout << "PROCURANDO URI: " << uri << "\n";
+
+    if (bodyData.empty()) {
         setStatus(400);
         setHeader("400 Bad Request", "text/plain");
         _body = "400 Bad Request: No request body found";
-        return ;
+    } else {
+        // Assume que o POST é sempre para um script CGI
+        std::string response = executeCGI(path);
+        CgiHandler cgiHandler(_client.getRequest());
+        cgiHandler.postCgi(_client);
+        _body = response;
+        setStatus(200);
+        setHeader("200 OK", "text/html");
     }
-    
-    CgiHandler post_cgi = CgiHandler(_client.getRequest());
-//    std::cout << "ANTES DO CGIHANDLER\n";
-    post_cgi.postCgi(_client);
-    setStatus(200);
+
     send();
 }
 

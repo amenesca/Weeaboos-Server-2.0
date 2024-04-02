@@ -3,6 +3,8 @@
 # include "../CgiHandler/CgiHandler.hpp"
 # include "../Client/Client.hpp"
 # include <fstream>
+#include <sys/wait.h> // Para a função waitpid
+#include <sys/types.h> // Para a função waitpid
 
 class Response {
     private:
@@ -12,6 +14,7 @@ class Response {
         std::string		_header;
 		std::string		_httpMessage;
 		CgiHandler		_cgiHandler;
+		ServerLog		_log;
     public:
         Response();
        	Response(Client client);
@@ -30,6 +33,9 @@ class Response {
 		std::string	setHeader(std::string status, std::string contentType);
 		std::string	toString(int number);
 		std::string	readData(const std::string& uri);
+		bool isCGIScript(const std::string& path);
+		std::string executeCGI(const std::string& scriptPath);
+		std::string readStaticFile(const std::string& filePath);
 
         void    send();
         void    httpMethods();

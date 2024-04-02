@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 16:15:50 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/02 19:58:37 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -264,7 +264,11 @@ int CgiHandler::postCgi(Client client)
 	{
 		std::vector<char*> argv;
 		std::string path;
-		path = _request.getUri().substr(1);
+		std::string root = client.getServerConfigs().getRoot();
+		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
+		std::cout << "PATH: " << path << std::endl;
+		std::string querry = extractQueryString(_request.getUri());
+		std::cout << "QUERY: " << querry << std::endl;
 		argv.push_back(strdup(path.c_str()));
 		argv.push_back(NULL);
 		if (access(path.c_str(), X_OK) == -1) {

@@ -1,40 +1,61 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Calculator | Webserv</title>
 </head>
-<body>
-    <h1>Calculadora</h1>
-    <form id="calculator" method="GET" action="./cgi-bin/calc.py">
-        <input type="text" id="expression" name="expression" readonly>
-        <br>
-        <button type="button" onclick="appendToExpression('7')">7</button>
-        <button type="button" onclick="appendToExpression('8')">8</button>
-        <button type="button" onclick="appendToExpression('9')">9</button>
-        <button type="button" onclick="appendToExpression('/')">/</button>
-        <br>
-        <button type="button" onclick="appendToExpression('4')">4</button>
-        <button type="button" onclick="appendToExpression('5')">5</button>
-        <button type="button" onclick="appendToExpression('6')">6</button>
-        <button type="button" onclick="appendToExpression('*')">*</button>
-        <br>
-        <button type="button" onclick="appendToExpression('1')">1</button>
-        <button type="button" onclick="appendToExpression('2')">2</button>
-        <button type="button" onclick="appendToExpression('3')">3</button>
-        <button type="button" onclick="appendToExpression('-')">-</button>
-        <br>
-        <button type="button" onclick="appendToExpression('0')">0</button>
-        <button type="button" onclick="appendToExpression('.')">.</button>
-        <button type="submit">=</button>
-        <button type="button" onclick="appendToExpression('+')">+</button>
-    </form>
-
-    <script>
-        function appendToExpression(value) {
-            document.getElementById('expression').value += value;
-        }
-    </script>
+<body class="bg-slate-900">
+    <main class="w-screen h-screen flex justify-center items-center text-white">
+      <form
+        action="./cgi-bin/calc.py"
+        method="get"
+        class="flex flex-col space-y-4 w-96 p-8 bg-slate-800 rounded-md"
+      >
+        <div class="flex justify-center w-full">
+          <h1 class="text-2xl text-slate-100">Calculator</h1>
+        </div>
+        <div class="flex flex-col space-y-1">
+          <label class="text-slate-300">Number 1: </label>
+          <input
+            type="text"
+            name="num1"
+            class="p-2 rounded-md bg-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div class="flex flex-col space-y-1">
+          <label class="text-slate-300">Number 2: </label>
+          <input
+            type="text"
+            name="num2"
+            class="p-2 rounded-md bg-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+        <div class="flex flex-col space-y-1">
+            <label class="text-slate-300">Operação: </label>
+            <select class="py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all duration-300" name="operacao">
+                <option value="+">+</option>
+                <option value="-">-</option>
+                <option value="*">*</option>
+                <option value="/">/</option>
+              </select>
+          </div>
+        <button
+          type="submit"
+          class="py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all duration-300"
+        >
+          Send
+        </button>
+        <a
+          href="/"
+          class="py-2 text-center ring-2 ring-blue-500 rounded-md"
+        >
+          Back to home
+        </a>
+      </form>
+    </main>
 </body>
 </html>
