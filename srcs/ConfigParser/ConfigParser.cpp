@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/23 18:55:29 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 13:46:56 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -340,6 +340,7 @@ void ConfigParser::configVServer(VirtualServer* currentServer)
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setHost(treatHost(split(buff)[1]));
+			currentServer->setStrHost(split(buff)[1]);
 			continue;
 		}
 		else if (buff.find("index", 0) != std::string::npos && \

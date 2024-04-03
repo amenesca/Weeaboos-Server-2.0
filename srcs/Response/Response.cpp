@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 16:05:53 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 14:05:04 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,16 +18,18 @@ Response::Response()
     _body(""),
     _header(""),
     _httpMessage(""),
-	_cgiHandler()
+	_cgiHandler(),
+	_allServersConfigs()
 {}
 
-Response::Response(Client client) 
+Response::Response(const Client& client, const std::vector<VirtualServer>& allServers) 
 :   _client(client),
     _status(0),
     _body(""),
     _header(""),
 	_httpMessage(""),
-	_cgiHandler()
+	_cgiHandler(),
+	_allServersConfigs(allServers)
 {}
 
 Response::~Response() {}
@@ -42,6 +44,7 @@ Response&	Response::operator=(const Response& src)
 		this->_header = src.getHeader();
 		this->_httpMessage = src.getHttpMessage();
 		this->_cgiHandler = src.getCgiHandler();
+		this->_allServersConfigs = src.getAllServersConfigs();
 	}
 	return *this;
 	
@@ -83,6 +86,11 @@ CgiHandler	Response::getCgiHandler() const
 	return this->_cgiHandler;	
 }
 
+std::vector<VirtualServer> Response::getAllServersConfigs() const
+{
+	return this->_allServersConfigs;
+}
+
 void    Response::setStatus(int status)
 {
     this->_status = status;
@@ -112,9 +120,9 @@ void Response::send() {
    _httpMessage.append(_body);
 }
 
-std::string Response::readData(const std::string& uri)
+std::string Response::CreatePath(const std::string& uri)
 {
-    std::string path;
+	std::string path;
     std::string uri_without_query;
 
     // Encontra a posição do caractere '?'
@@ -127,21 +135,40 @@ std::string Response::readData(const std::string& uri)
         uri_without_query = uri; // Se não houver '?', usa a URI completa
     }
 
+	std::string		hostToCheck = _client.getRequest().getHeaders()["Host"];
+	bool			timeToBreak = false;
     // Resto do código permanece o mesmo, usando uri_without_query
+	for (size_t i = 0; i < this->_allServersConfigs.size(); i++)
+	{
+		VirtualServer	currentServer  = _allServersConfigs[i];
+		std::cout << "Current Server Host: " << currentServer.getStrHost() << std::endl;
+		std::cout << "Request Host: " << hostToCheck << std::endl;
+		if (currentServer.getStrHost() == hostToCheck)
+		{
+			timeToBreak = true;
+			std::vector<Location> currentServerLocations = currentServer.getLocations();
+			for (size_t j = 0; j < currentServerLocations.size(); j++) 
+			{
+				std::cout << "Path da location: " << currentServerLocations[j].getPath() << std::endl;
+				std::cout << "Uri sem query: " << uri_without_query << std::endl;
+				if (currentServerLocations[j].getPath() == uri_without_query) 
+				{
+					path = _client.getServerConfigs().getRoot() + "/" + currentServerLocations[j].getIndex()[1];
+					std::cout << "PATH FORMADO: " << path << std::endl;
+					break;
+				}
+			}
+			if (timeToBreak == true)
+				break;
+		}
+	}
+	return path;
+}
 
-    if (_client.getServerConfigs().getLocations().size() > 1) {
-        for (size_t i = 0; i < _client.getServerConfigs().getLocations().size(); i++) {
-			std::cout << "Path da location: " << _client.getServerConfigs().getLocations()[i].getPath() << std::endl;
-			std::cout << "Uri sem query: " << uri_without_query << std::endl;
-            if (_client.getServerConfigs().getLocations()[i].getPath() == uri_without_query) {
-                path = _client.getServerConfigs().getRoot() + "/" + _client.getServerConfigs().getLocations()[i].getIndex()[1];
-                std::cout << "PATH FORMADO: " << path << std::endl;
-                break;
-            }
-        }
-    } else {
-        path = _client.getServerConfigs().getRoot() + uri_without_query + _client.getServerConfigs().getLocations()[0].getIndex()[1];
-    }
+std::string Response::readData(const std::string& uri)
+{
+	std::string path = CreatePath(uri);
+	
     std::cout << "PATH RESPONSE: " << path << std::endl;
     std::ifstream file(path.c_str());
     if (!file.is_open()) {

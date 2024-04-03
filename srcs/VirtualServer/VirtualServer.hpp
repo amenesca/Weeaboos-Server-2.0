@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:16 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/21 16:04:51 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 13:43:47 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ class VirtualServer
 		std::string					_root;
 		std::vector<std::string>	_serverName;
 		in_addr_t					_host;
+		std::string					_strHost;
 		std::vector<std::string>	_index;
 		int							_maxBodySize;
 		std::vector<std::string>	_errorPage;
@@ -55,7 +56,8 @@ class VirtualServer
 		int							getFdSocket(void) const;
 		int							getMainPort(void) const;
 		std::vector<Location>*		getLocationsAddress(void);
-
+		std::string					getStrHost(void) const;
+		
 		void	setServerDefault(const bool& serverDefault);
 		void	setPort(const std::vector<int>& port);
 		void	setRoot(const std::string& root);
@@ -67,6 +69,7 @@ class VirtualServer
 		void	setLocations(const std::vector<Location>& locations);
 		void	setFdSocket(const int& fd_socket);
 		void	setMainPort(const int& main_port);
+		void	setStrHost(const std::string& strHost);
 
 		void	initialize(void);
 		int		acceptCon(void) const;
