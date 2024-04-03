@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
 import cgi
 
+# Recebe os parâmetros da URL
 form = cgi.FieldStorage()
 
-if "num1" in form and "num2" in form and "operacao" in form:
-    try:
-        num1 = float(form["num1"].value)
-        num2 = float(form["num2"].value)
-        operacao = form["operacao"].value
+# Obtém os valores dos parâmetros
+num1 = float(form.getvalue('num1'))
+num2 = float(form.getvalue('num2'))
+operator = form.getvalue('operator')
 
-        resultado = None
+# Verifica se os campos estão vazios
+if operator == 'add':
+    result = num1 + num2
+elif operator == 'subtract':
+    result = num1 - num2
+elif operator == 'multiply':
+     result = num1 * num2
+elif operator == 'divide':
+    if num2 != 0:
+        result = num1 / num2
+    else:
+        result = "Erro: Divisao por zero"
 
-        if operacao == "+":
-            resultado = num1 + num2
-        elif operacao == "-":
-            resultado = num1 - num2
-        elif operacao == "*":
-            resultado = num1 * num2
-        elif operacao == "/":
-            if num2 != 0:
-                resultado = num1 / num2
-            else:
-                resultado = "Erro: Divisão por zero não é permitida!"
+# Imprime o cabeçalho HTTP e o resultado
+print("Content-type:text/html\r\n\r\n")
+print("<html>")
+print("<head>")
+print("<title>Resultado</title>")
+print("</head>")
+print("<body>")
+print(f"<h2>Resultado: {result}</h2>")
+print("</body>")
+print("</html>")
 
-        if resultado is not None:
-            print(f"<p>O resultado de {num1} {operacao} {num2} = {resultado}</p>")
-    except ValueError:
-        print("<p>Erro: Por favor, insira números válidos.</p>")
-else:
-    print("Os campos 'num1' ou 'num2' estão vazios.")

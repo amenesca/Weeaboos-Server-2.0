@@ -1,61 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Calculator | Webserv</title>
+    <title>Calculadora</title>
 </head>
-<body class="bg-slate-900">
-    <main class="w-screen h-screen flex justify-center items-center text-white">
-      <form
-        action="./cgi-bin/calc.py"
-        method="get"
-        class="flex flex-col space-y-4 w-96 p-8 bg-slate-800 rounded-md"
-      >
-        <div class="flex justify-center w-full">
-          <h1 class="text-2xl text-slate-100">Calculator</h1>
-        </div>
-        <div class="flex flex-col space-y-1">
-          <label class="text-slate-300">Number 1: </label>
-          <input
-            type="text"
-            name="num1"
-            class="p-2 rounded-md bg-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-        <div class="flex flex-col space-y-1">
-          <label class="text-slate-300">Number 2: </label>
-          <input
-            type="text"
-            name="num2"
-            class="p-2 rounded-md bg-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-        <div class="flex flex-col space-y-1">
-            <label class="text-slate-300">Operação: </label>
-            <select class="py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all duration-300" name="operacao">
-                <option value="+">+</option>
-                <option value="-">-</option>
-                <option value="*">*</option>
-                <option value="/">/</option>
-              </select>
-          </div>
-        <button
-          type="submit"
-          class="py-2 bg-blue-500 rounded-md hover:bg-blue-600 transition-all duration-300"
-        >
-          Send
-        </button>
-        <a
-          href="/"
-          class="py-2 text-center ring-2 ring-blue-500 rounded-md"
-        >
-          Back to home
-        </a>
-      </form>
-    </main>
+<body>
+    <h2>Calculadora</h2>
+    <form action="./cgi-bin/calc.py" method="post">
+        <input type="number" name="num1" placeholder="Número 1" required>
+        <select name="operator">
+            <option value="add">+</option>
+            <option value="subtract">-</option>
+            <option value="multiply">*</option>
+            <option value="divide">/</option>
+        </select>
+        <input type="number" name="num2" placeholder="Número 2" required>
+        <button type="submit">Calcular</button>
+    </form>
 </body>
 </html>

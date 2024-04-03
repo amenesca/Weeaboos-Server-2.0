@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 19:58:37 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/03 13:55:15 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -211,7 +211,7 @@ int CgiHandler::getCgi(Client client)
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
 		}
-		_log.createLog();
+		//_log.createLog();
 		
 		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
@@ -299,7 +299,7 @@ int CgiHandler::postCgi(Client client)
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
 		}
-		_log.createLog();
+		//_log.createLog();
 		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
 			exit(1);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/02 20:11:13 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/03 14:29:21 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,6 @@ std::string Response::executeCGI(const std::string& scriptPath)
         //args.push_back(strdup(uri.c_str()));
 		args.push_back(NULL);
         //char* args[] = {const_cast<char*>(scriptPath.c_str()), const_cast<char*>(uri.c_str()), NULL};
-        _log.createLog();
         if (execve(scriptPath.c_str(), args.data(), NULL) == -1) {
             std::cerr << "Failed to execute CGI script" << std::endl;
             exit(EXIT_FAILURE);
