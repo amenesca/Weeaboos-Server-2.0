@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:23 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/15 17:24:51 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 14:42:32 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,4 +67,3 @@ class ConfigParser
 				virtual const char* what() const throw();
 		};
 };
-
