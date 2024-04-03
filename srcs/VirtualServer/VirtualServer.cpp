@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 22:31:11 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 14:42:06 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ VirtualServer::VirtualServer(void) :
 	_root(""),
 	_serverName(),
 	_host(INADDR_NONE),
+	_strHost(""),
 	_index(),
 	_maxBodySize(0),
 	_errorPage(),
@@ -35,6 +36,7 @@ VirtualServer::~VirtualServer(void)
 	_root.clear();
 	_serverName.clear();
 	_host = INADDR_NONE;
+	_strHost.clear();
 	_index.clear();
 	_maxBodySize = 0;
 	_errorPage.clear();
@@ -51,6 +53,7 @@ VirtualServer& VirtualServer::operator=(const VirtualServer& src)
 		this->_root = src.getRoot();
 		this->_serverName = src.getServerName();
 		this->_host	= src.getHost();
+		this->_strHost = src.getStrHost();
 		this->_index = src.getIndex();
 		this->_maxBodySize = src.getMaxBodySize();
 		this->_errorPage = src.getErrorPage();
@@ -90,6 +93,11 @@ std::vector<std::string> VirtualServer::getServerName(void) const
 in_addr_t VirtualServer::getHost(void) const
 {
 	return this->_host;
+}
+
+std::string VirtualServer::getStrHost(void) const
+{
+	return this->_strHost;
 }
 
 std::vector<std::string> VirtualServer::getIndex(void) const
@@ -152,6 +160,11 @@ void	VirtualServer::setHost(const in_addr_t& host)
 	this->_host = host;
 }
 
+void	VirtualServer::setStrHost(const std::string& strHost)
+{
+	this->_strHost = strHost;
+}
+
 void	VirtualServer::setIndex(const std::vector<std::string>& index)
 {
 	this->_index = index;
@@ -188,36 +201,38 @@ void	VirtualServer::initialize(void)
 	socklen_t			server_addr_len;
 	int					opt;
 	
-	opt = 1;
-	this->_main_port = _port[0];
-	this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-	
-	if (this->_fd_socket == -1)
+	if (_serverDefault == true)
 	{
-		throw SocketError();
+		opt = 1;
+		this->_main_port = _port[0];
+		this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+		
+		if (this->_fd_socket == -1)
+		{
+			throw SocketError();
+		}
+		setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
+			&opt, sizeof(int));
+
+		std::memset(&server_addr, 0, sizeof(server_addr));
+		server_addr.sin_family = AF_INET;
+		server_addr.sin_addr.s_addr = this->getHost();
+		server_addr.sin_port = htons(this->_main_port);
+
+		server_addr_len = sizeof(server_addr);
+
+		if (bind(this->_fd_socket, \
+			reinterpret_cast<struct sockaddr*>(&server_addr), \
+			server_addr_len) == -1)
+		{
+			throw BindError();
+		}
+
+		if (listen(this->_fd_socket, 1024) == -1)
+		{
+			throw ListenError();
+		}
 	}
-	setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
-		&opt, sizeof(int));
-
-	std::memset(&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = this->getHost();
-	server_addr.sin_port = htons(this->_main_port);
-
-	server_addr_len = sizeof(server_addr);
-
-	if (bind(this->_fd_socket, \
-		reinterpret_cast<struct sockaddr*>(&server_addr), \
-		server_addr_len) == -1)
-	{
-		throw BindError();
-	}
-
-	if (listen(this->_fd_socket, 1024) == -1)
-	{
-		throw ListenError();
-	}
-
 	return ;
 }
 

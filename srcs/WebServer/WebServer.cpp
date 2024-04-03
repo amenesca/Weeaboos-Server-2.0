@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/01 17:14:52 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/03 14:43:56 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ WebServer::WebServer() :
 	_vServers(),
 	_Clients(),
 	_pollFds(),
-	_nbrServers(0)
+	_nbrServers(1)
 {
 	
 }
@@ -29,11 +29,11 @@ WebServer::~WebServer()
 	_nbrServers = 0;
 }
 
-WebServer::WebServer(const std::vector<VirtualServer>& vServers, const int& nbrServers) :
+WebServer::WebServer(const std::vector<VirtualServer>& vServers) :
 	_vServers(vServers),
 	_Clients(),
 	_pollFds(),
-	_nbrServers(nbrServers)
+	_nbrServers(1)
 {}
 
 WebServer::WebServer(const WebServer& copy)
@@ -97,7 +97,7 @@ void	WebServer::setClients(const std::vector<Client>& clients)
 void	WebServer::addVServersSockToPoll(void)
 {
 	std::cout << "Adding vservers sockets to poll." << std::endl;
-	for (size_t i = 0; i < this->_vServers.size(); i++)
+	for (int i = 0; i < _nbrServers; i++)
 	{
 		addNewSocketToPoll(this->_vServers[i].getFdSocket());
 	}
@@ -262,7 +262,7 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 	{
 //		std::cout << "ENTROU AQUI" << std::endl;
 //	std::cout << "Imprimindo Content-Type: " << _Clients[clientPos].getRequest().getHeaders()["Content-Type"] << std::endl;
-		Response makeResponse(_Clients[clientPos]);
+		Response makeResponse(_Clients[clientPos], this->_vServers);
 		makeResponse.httpMethods();
 
 		std::string response = makeResponse.getHttpMessage();
