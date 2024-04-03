@@ -15,10 +15,9 @@ class Response {
 		std::string		_httpMessage;
 		CgiHandler		_cgiHandler;
 		ServerLog		_log;
-		std::vector<VirtualServer> _allServersConfigs;
     public:
         Response();
-       	Response(const Client& client, const std::vector<VirtualServer>& allServers);
+       	Response(const Client& client);
         ~Response();
 		Response(const Response& copy);
 		Response&	operator=(const Response& copy);
@@ -29,12 +28,12 @@ class Response {
 		Client		getClient() const;
 		std::string getBody() const;
 		CgiHandler  getCgiHandler() const;
-		std::vector<VirtualServer>	getAllServersConfigs() const;
 
         void        setStatus(int status);
 		std::string	setHeader(std::string status, std::string contentType);
 		std::string	toString(int number);
 		std::string CreatePath(const std::string& uri);
+		std::string createErrorPath(int errorStatus);
 		std::string	readData(const std::string& uri);
 		bool isCGIScript(const std::string& path);
 		std::string executeCGI(const std::string& scriptPath);

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 14:42:06 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 15:17:53 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,37 +201,35 @@ void	VirtualServer::initialize(void)
 	socklen_t			server_addr_len;
 	int					opt;
 	
-	if (_serverDefault == true)
+
+	opt = 1;
+	this->_main_port = _port[0];
+	this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
+	
+	if (this->_fd_socket == -1)
 	{
-		opt = 1;
-		this->_main_port = _port[0];
-		this->_fd_socket = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0);
-		
-		if (this->_fd_socket == -1)
-		{
-			throw SocketError();
-		}
-		setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
-			&opt, sizeof(int));
+		throw SocketError();
+	}
+	setsockopt(this->_fd_socket, SOL_SOCKET, SO_REUSEADDR, \
+		&opt, sizeof(int));
 
-		std::memset(&server_addr, 0, sizeof(server_addr));
-		server_addr.sin_family = AF_INET;
-		server_addr.sin_addr.s_addr = this->getHost();
-		server_addr.sin_port = htons(this->_main_port);
+	std::memset(&server_addr, 0, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = this->getHost();
+	server_addr.sin_port = htons(this->_main_port);
 
-		server_addr_len = sizeof(server_addr);
+	server_addr_len = sizeof(server_addr);
 
-		if (bind(this->_fd_socket, \
-			reinterpret_cast<struct sockaddr*>(&server_addr), \
-			server_addr_len) == -1)
-		{
-			throw BindError();
-		}
+	if (bind(this->_fd_socket, \
+		reinterpret_cast<struct sockaddr*>(&server_addr), \
+		server_addr_len) == -1)
+	{
+		throw BindError();
+	}
 
-		if (listen(this->_fd_socket, 1024) == -1)
-		{
-			throw ListenError();
-		}
+	if (listen(this->_fd_socket, 1024) == -1)
+	{
+		throw ListenError();
 	}
 	return ;
 }
