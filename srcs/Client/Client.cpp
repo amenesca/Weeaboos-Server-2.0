@@ -214,7 +214,7 @@ short int	Client::receiveRequest(int client)
 		return false;
 	}
 	
-	std::cout << buffer << "\nFim do buffer\n" << std::endl;
+//	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
