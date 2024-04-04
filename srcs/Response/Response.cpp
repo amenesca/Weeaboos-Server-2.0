@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 16:30:58 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 16:56:52 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,8 +285,13 @@ void Response::handleGET()
 //    std::cout << "Data do get:" << data << std::endl;
 	std::string errorPath;
 	
-
-	if (path.empty()) 
+	std::ifstream index;
+	if (!path.empty())
+	{
+		index.open(path.c_str());
+	}
+	
+	if (path.empty() || !index.is_open()) 
 	{
 		std::cout << "Entrou aqui data errado" << std::endl;
         errorPath = createErrorPath(404);
@@ -294,7 +299,10 @@ void Response::handleGET()
 		_body = readStaticFile(errorPath);
         setStatus(404);
         setHeader("404 Not Found", "text/html");
-    } 
+		send();
+		return;
+    }
+	index.close();
     
 	std::string data = readData(path);
 	
@@ -306,6 +314,8 @@ void Response::handleGET()
 		_body = readStaticFile(errorPath);
         setStatus(500);
         setHeader("500 Internal Server Error", "text/html");
+		send();
+		return;
     }
 	else
 	{
@@ -322,9 +332,14 @@ void Response::handlePOST()
     std::string bodyData = _client.getRequest().getNewRequestBody();
     std::string path = CreatePath(this->_client.getRequest().getUri());
 	std::cout << "PATH DO POST: " << path << std::endl;
-
 	
-	if (path.empty()) // Alteração de alan
+	std::ifstream index;
+	if (!path.empty())
+	{
+		index.open(path.c_str());
+	}
+	
+	if (path.empty() || !index.is_open())
 	{
 		std::string errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
@@ -333,8 +348,10 @@ void Response::handlePOST()
         setHeader("404 Not Found", "text/html");
 		send();
 		return;
-	} // fim da alteração de alan
-    else if (bodyData.empty())
+	}
+	index.close();
+	
+    if (bodyData.empty())
 	{
         std::string errorPath = createErrorPath(400);
 		std::cout << "Error Path: " << errorPath << std::endl;
