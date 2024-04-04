@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 14:42:43 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 16:17:27 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -352,11 +352,11 @@ void ConfigParser::configVServer(VirtualServer* currentServer)
 		else if (buff.find("max_body_size", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
-			currentServer->setMaxBodySize(treatMaxBodySize(split(buff)[1]) && \
-			buff.find("}") == std::string::npos);
+			currentServer->setMaxBodySize(treatMaxBodySize(split(buff)[1]));
 			continue;
 		}
-		else if (buff.find("error_page", 0) != std::string::npos)
+		else if (buff.find("error_page", 0) != std::string::npos  && \
+			buff.find("}") == std::string::npos)
 		{
 			currentServer->setErrorPage(split(buff));
 			continue;

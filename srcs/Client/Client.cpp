@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/04 14:10:00 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/04 16:06:12 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,7 +214,7 @@ short int	Client::receiveRequest(int client)
 		return false;
 	}
 	
-//	std::cout << buffer << "\nFim do buffer\n" << std::endl;
+	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
