@@ -35,9 +35,11 @@ class Response {
 		std::string CreatePath(const std::string& uri);
 		std::string createErrorPath(int errorStatus);
 		std::string	readData(const std::string& path);
-		bool isCGIScript(const std::string& path);
+		bool 		isCGIScript(const std::string& path);
 		std::string executeCGI(const std::string& scriptPath);
 		std::string readStaticFile(const std::string& filePath);
+		bool		MethodIsAllowed(int j);
+
 
         void    send();
         void    httpMethods();

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 16:56:52 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 17:20:03 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,21 @@ void Response::send() {
    _httpMessage.append(_body);
 }
 
+bool	Response::MethodIsAllowed(int j)
+{
+	std::vector<std::string>	AllowedMethods = _client.getServerConfigs().getLocations()[j].getMethods();
+	std::string					currentMethod = _client.getRequest().getMethod();
+
+	for (size_t i = 1; i < AllowedMethods.size(); i++)
+	{
+		if (AllowedMethods[i] == currentMethod)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 std::string Response::CreatePath(const std::string& uri)
 {
 	std::string path = "";
@@ -142,6 +157,10 @@ std::string Response::CreatePath(const std::string& uri)
 			std::cout << "Uri sem query: " << uri_without_query << std::endl;
 			if (serverLocations[j].getPath() == uri_without_query) 
 			{
+				if (!MethodIsAllowed(j))
+				{
+					return "ERRO405";
+				}
 				path = _client.getServerConfigs().getRoot() + "/" + serverLocations[j].getIndex()[1];
 				std::cout << "PATH FORMADO: " << path << std::endl;
 				break;
@@ -285,6 +304,17 @@ void Response::handleGET()
 //    std::cout << "Data do get:" << data << std::endl;
 	std::string errorPath;
 	
+	if (path == "ERRO405")
+	{
+		errorPath = createErrorPath(405);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(405);
+        setHeader("405 Method Not Allowed", "text/html");
+		send();
+		return;
+	}
+	
 	std::ifstream index;
 	if (!path.empty())
 	{
@@ -293,7 +323,6 @@ void Response::handleGET()
 	
 	if (path.empty() || !index.is_open()) 
 	{
-		std::cout << "Entrou aqui data errado" << std::endl;
         errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
@@ -332,7 +361,19 @@ void Response::handlePOST()
     std::string bodyData = _client.getRequest().getNewRequestBody();
     std::string path = CreatePath(this->_client.getRequest().getUri());
 	std::cout << "PATH DO POST: " << path << std::endl;
+	std::string errorPath;
 	
+	if (path == "ERRO405")
+	{
+		errorPath = createErrorPath(405);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(405);
+        setHeader("405 Method Not Allowed", "text/html");
+		send();
+		return;
+	}
+
 	std::ifstream index;
 	if (!path.empty())
 	{
@@ -341,7 +382,7 @@ void Response::handlePOST()
 	
 	if (path.empty() || !index.is_open())
 	{
-		std::string errorPath = createErrorPath(404);
+		errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(404);
@@ -353,18 +394,20 @@ void Response::handlePOST()
 	
     if (bodyData.empty())
 	{
-        std::string errorPath = createErrorPath(400);
+       errorPath = createErrorPath(400);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(400);
         setHeader("400 Bad Request", "text/plain");
+		send();
+		return;
     }
 	else if (static_cast<int>(bodyData.size()) > _client.getServerConfigs().getMaxBodySize())
 	{
 		std::cout << "Body Size: " << static_cast<int>(bodyData.size()) << std::endl;
 		std::cout << "Max Body Size: " <<_client.getServerConfigs().getMaxBodySize() << std::endl;
 		
-		std::string errorPath = createErrorPath(413);
+		errorPath = createErrorPath(413);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(413);
