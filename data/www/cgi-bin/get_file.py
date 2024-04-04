@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import cgi
 import os
-print("TESTE")
 form = cgi.FieldStorage()
 fileitem = form['file']
 
@@ -15,6 +14,16 @@ if fileitem.filename:
 else:
    message = 'No file was uploaded'
 
-print(message)
+
+print("<html>")
+print("<head>")
+print("<title>Upload Result</title>")
+print("</head>")
+print("<body>")
+print("<h1>Upload Result</h1>")
+print(f"<p>{message}</p>")
+print(f'<img src="tmp/{fileitem.filename}" alt="Uploaded image" />')
+print("</body>")
+print("</html>")
 
 

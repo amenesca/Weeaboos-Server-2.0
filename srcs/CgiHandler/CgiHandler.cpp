@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/03 16:54:25 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 14:09:25 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -231,7 +231,7 @@ int CgiHandler::getCgi(Client client)
 	return (0);
 }
 
-int CgiHandler::postCgi(Client client)
+std::string CgiHandler::postCgi(Client client)
 {
 	int response_pipe[2];
 	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
@@ -250,7 +250,7 @@ int CgiHandler::postCgi(Client client)
 	antiBlock(_request_pipe, response_pipe);
 	
 	if (!writePipes(_request.getNewRequestBody())) {
-        return (1);
+        return ("");
 	}
 
 	_pid = fork();
@@ -299,24 +299,33 @@ int CgiHandler::postCgi(Client client)
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
 		}
-		//_log.createLog();
 		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
 			exit(1);
 		}
-		return (0);
 	}
 	else
 	{
+		waitpid(_pid, NULL, 0);
 		close(_request_pipe[0]);
 		close(response_pipe[1]);
-		if (!checkAvailability(response_pipe[0]))
-		{
-			return (-1);
+		char buffer[4096];
+		std::string responseBody;
+		ssize_t bytesRead;
+		while ((bytesRead = read(response_pipe[0], buffer, sizeof(buffer))) > 0) {
+			responseBody.append(buffer, bytesRead);
+			memset(buffer, 0, sizeof(buffer));
 		}
-		return (1);
+		if (bytesRead == -1) {
+			std::cerr << "Error reading from pipe: " << strerror(errno) << std::endl;
+			exit(1);
+		}
+		close(_request_pipe[1]);
+		close(response_pipe[0]);
+		//std::cout << "RESPONSE BODY: " << responseBody << std::endl;
+		return (responseBody);
 	}
-	return (0);
+	return ("");
 }
 
 void CgiHandler::antiBlock(int *pipe1, int *pipe2)
@@ -339,7 +348,6 @@ bool        CgiHandler::writePipes(std::string message)
 {
     size_t  bytesWritten;
     ssize_t bytes;
-
     bytesWritten = 0;
     while (bytesWritten < message.length())
     {
