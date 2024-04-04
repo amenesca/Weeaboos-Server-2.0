@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 13:53:48 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/04 14:39:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,12 @@ std::string Response::CreatePath(const std::string& uri)
     } else {
         uri_without_query = uri; // Se não houver '?', usa a URI completa
     }
+
+	if (uri_without_query.find("/cgi-bin/tmp/") != std::string::npos || 
+		uri_without_query.find("/images/") != std::string::npos) {
+		path = _client.getServerConfigs().getRoot() + uri_without_query;
+		return path;
+	}
 
 	if (this->_client.getServerConfigs().getStrHost() == this->_client.getRequest().getHeaders()["Host"])
 	{	
@@ -270,7 +276,7 @@ void Response::handleGET()
     std::string uri = _client.getRequest().getUri();
     std::cout << "Valor da URI: " << uri << std::endl;
     std::string data = readData(uri);
-    std::cout << "Data do get:" << data << std::endl;
+//    std::cout << "Data do get:" << data << std::endl;
 	std::string errorPath;
 	
 
