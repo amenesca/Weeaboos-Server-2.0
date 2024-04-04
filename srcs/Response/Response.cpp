@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/03 14:40:08 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 16:52:07 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,16 @@ Response::Response()
     _body(""),
     _header(""),
     _httpMessage(""),
-	_cgiHandler(),
-	_allServersConfigs()
+	_cgiHandler()
 {}
 
-Response::Response(const Client& client, const std::vector<VirtualServer>& allServers) 
+Response::Response(const Client& client) 
 :   _client(client),
     _status(0),
     _body(""),
     _header(""),
 	_httpMessage(""),
-	_cgiHandler(),
-	_allServersConfigs(allServers)
+	_cgiHandler()
 {}
 
 Response::~Response() {}
@@ -44,7 +42,6 @@ Response&	Response::operator=(const Response& src)
 		this->_header = src.getHeader();
 		this->_httpMessage = src.getHttpMessage();
 		this->_cgiHandler = src.getCgiHandler();
-		this->_allServersConfigs = src.getAllServersConfigs();
 	}
 	return *this;
 	
@@ -86,11 +83,6 @@ CgiHandler	Response::getCgiHandler() const
 	return this->_cgiHandler;	
 }
 
-std::vector<VirtualServer> Response::getAllServersConfigs() const
-{
-	return this->_allServersConfigs;
-}
-
 void    Response::setStatus(int status)
 {
     this->_status = status;
@@ -122,7 +114,7 @@ void Response::send() {
 
 std::string Response::CreatePath(const std::string& uri)
 {
-	std::string path;
+	std::string path = "";
     std::string uri_without_query;
 
     // Encontra a posição do caractere '?'
@@ -135,31 +127,19 @@ std::string Response::CreatePath(const std::string& uri)
         uri_without_query = uri; // Se não houver '?', usa a URI completa
     }
 
-	std::string		hostToCheck = _client.getRequest().getHeaders()["Host"];
-	bool			timeToBreak = false;
-    // Resto do código permanece o mesmo, usando uri_without_query
-	for (size_t i = 0; i < this->_allServersConfigs.size(); i++)
-	{
-		VirtualServer	currentServer  = _allServersConfigs[i];
-		std::cout << "Current Server Host: " << currentServer.getStrHost() << std::endl;
-		std::cout << "Request Host: " << hostToCheck << std::endl;
-		if (currentServer.getStrHost() == hostToCheck)
+	if (this->_client.getServerConfigs().getStrHost() == this->_client.getRequest().getHeaders()["Host"])
+	{	
+		std::vector<Location> serverLocations = this->_client.getServerConfigs().getLocations();
+		for (size_t j = 0; j < serverLocations.size(); j++) 
 		{
-			timeToBreak = true;
-			std::vector<Location> currentServerLocations = currentServer.getLocations();
-			for (size_t j = 0; j < currentServerLocations.size(); j++) 
+			std::cout << "Path da location: " << serverLocations[j].getPath() << std::endl;
+			std::cout << "Uri sem query: " << uri_without_query << std::endl;
+			if (serverLocations[j].getPath() == uri_without_query) 
 			{
-				std::cout << "Path da location: " << currentServerLocations[j].getPath() << std::endl;
-				std::cout << "Uri sem query: " << uri_without_query << std::endl;
-				if (currentServerLocations[j].getPath() == uri_without_query) 
-				{
-					path = _client.getServerConfigs().getRoot() + "/" + currentServerLocations[j].getIndex()[1];
-					std::cout << "PATH FORMADO: " << path << std::endl;
-					break;
-				}
-			}
-			if (timeToBreak == true)
+				path = _client.getServerConfigs().getRoot() + "/" + serverLocations[j].getIndex()[1];
+				std::cout << "PATH FORMADO: " << path << std::endl;
 				break;
+			}
 		}
 	}
 	return path;
@@ -254,19 +234,62 @@ std::string Response::readStaticFile(const std::string& filePath)
     return ss.str();
 }
 
+std::string Response::createErrorPath(int errorStatus)
+{
+	std::string path;
+	if (errorStatus == 404)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[2];
+	}
+	if (errorStatus == 400)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[1];
+	}
+	if (errorStatus == 405)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[3];
+	}
+	return path;
+}
+
+int	cgiExists(const std::string& pathToCgi)
+{
+	 std::ifstream file(pathToCgi.c_str());
+    if (!file.is_open())
+	{
+        return 1;
+    } 
+	else
+	{
+		file.close();
+		return 0;
+	}
+}
+
 void Response::handleGET()
 {
     std::string uri = _client.getRequest().getUri();
     std::cout << "Valor da URI: " << uri << std::endl;
     std::string data = readData(uri);
-    if (!data.empty()) {
+    std::cout << "Data do get:" << data << std::endl;
+	std::string errorPath;
+	
+
+	if (!data.empty()) 
+	{
+		std::cout << "Entrou aqui data certo" << std::endl;
         _body = data;
         setStatus(200);
         setHeader("200 OK", "text/html");
-    } else {
+    } 
+	else 
+	{	
+		std::cout << "Entrou aqui data errado" << std::endl;
+        errorPath = createErrorPath(404);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
         setStatus(404);
         setHeader("404 Not Found", "text/html");
-        _body = "404 Not Found";
     }
     send();
 }
@@ -274,17 +297,30 @@ void Response::handleGET()
 void Response::handlePOST()
 {
     std::string bodyData = _client.getRequest().getNewRequestBody();
-    std::string uri = _client.getRequest().getUri();
-    std::string root = _client.getServerConfigs().getRoot();
-    std::string path = root + uri;
-    std::cout << "PATH HANDLE: " << path << "\n";
-    std::cout << "PROCURANDO URI: " << uri << "\n";
+    std::string path = CreatePath(this->_client.getRequest().getUri());
+	std::cout << "PATH DO POST: " << path << std::endl;
 
-    if (bodyData.empty()) {
+	
+	if (path.empty()) // Alteração de alan
+	{
+		std::string errorPath = createErrorPath(404);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(404);
+        setHeader("404 Not Found", "text/html");
+		send();
+		return;
+	} // fim da alteração de alan
+    if (bodyData.empty())
+	{
+        std::string errorPath = createErrorPath(400);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
         setStatus(400);
         setHeader("400 Bad Request", "text/plain");
-        _body = "400 Bad Request: No request body found";
-    } else {
+    } 
+	else
+	{
         // Assume que o POST é sempre para um script CGI
         std::string response = executeCGI(path);
         CgiHandler cgiHandler(_client.getRequest());
@@ -308,9 +344,11 @@ void Response::httpMethods()
         handlePOST();
     }
     else {
+        std::string errorPath = createErrorPath(405);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
         setStatus(405); // 405 =  Method Not Allowed
         setHeader("405 Method Not Allowed", "text/plain");
-        _body = "405 Method Not Allowed";
     }
     return ;
 }

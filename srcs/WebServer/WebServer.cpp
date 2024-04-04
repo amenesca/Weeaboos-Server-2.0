@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 14:43:56 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 16:00:11 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,11 @@ WebServer::~WebServer()
 	_nbrServers = 0;
 }
 
-WebServer::WebServer(const std::vector<VirtualServer>& vServers) :
+WebServer::WebServer(const std::vector<VirtualServer>& vServers, int nbrServers) :
 	_vServers(vServers),
 	_Clients(),
 	_pollFds(),
-	_nbrServers(1)
+	_nbrServers(nbrServers)
 {}
 
 WebServer::WebServer(const WebServer& copy)
@@ -160,6 +160,7 @@ void	WebServer::StartServer(void)
 		{
 			if (_pollFds[i].revents & POLLIN)
 			{
+				std::cout << "New Connection on server: " << i << std::endl;
 				this->openNewConnection(i);
 			}
 			else if(isPollError(i))
@@ -262,12 +263,12 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 	{
 //		std::cout << "ENTROU AQUI" << std::endl;
 //	std::cout << "Imprimindo Content-Type: " << _Clients[clientPos].getRequest().getHeaders()["Content-Type"] << std::endl;
-		Response makeResponse(_Clients[clientPos], this->_vServers);
+		Response makeResponse(_Clients[clientPos]);
 		makeResponse.httpMethods();
 
 		std::string response = makeResponse.getHttpMessage();
 
-//		std::cout << response << std::endl;
+		std::cout << response << std::endl;
 
 		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
 

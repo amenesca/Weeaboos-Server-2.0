@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 14:43:24 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/03 15:16:54 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ class WebServer
 	public:
 		WebServer(void);
 		~WebServer(void);
-		WebServer(const std::vector<VirtualServer>& vServers);
+		WebServer(const std::vector<VirtualServer>& vServers, int nbrServers);
 		WebServer(const WebServer& copy);
 		WebServer& operator=(const WebServer& src);
 

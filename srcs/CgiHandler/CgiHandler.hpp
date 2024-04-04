@@ -20,7 +20,7 @@ class CgiHandler {
         std::string         _response;
         bool                _active;
         void                antiBlock(int *pipe1, int *pipe2);
-        bool                writePipes(std::string message, size_t contentLength);
+        bool                writePipes(std::string message);
         int                 readPipes(int fd);
         bool                checkAvailability(int fd);
 	public:

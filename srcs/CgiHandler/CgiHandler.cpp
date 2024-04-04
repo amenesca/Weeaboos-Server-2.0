@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/03 13:55:15 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/03 16:54:25 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ int CgiHandler::postCgi(Client client)
 
 	antiBlock(_request_pipe, response_pipe);
 	
-	if (!writePipes(_request.getNewRequestBody(), _request.getNewRequestBody().length())) {
+	if (!writePipes(_request.getNewRequestBody())) {
         return (1);
 	}
 
@@ -335,7 +335,7 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-/*bool        CgiHandler::writePipes(std::string message)
+bool        CgiHandler::writePipes(std::string message)
 {
     size_t  bytesWritten;
     ssize_t bytes;
@@ -352,9 +352,9 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
         bytesWritten += bytes;
     }
     return (true);
-}*/
+}
 
-bool CgiHandler::writePipes(std::string message, size_t contentLength)
+/*bool CgiHandler::writePipes(std::string message, size_t contentLength)
 {
     size_t bytesWritten = 0;
     size_t bufferSize = 4096; // Tamanho do buffer para cada parte da imagem
@@ -369,7 +369,7 @@ bool CgiHandler::writePipes(std::string message, size_t contentLength)
         bytesWritten += bytes;
     }
     return true;
-}
+}*/
 
 int	CgiHandler::readPipes(int fd)
 {
