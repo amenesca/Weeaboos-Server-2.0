@@ -271,16 +271,20 @@ void Response::handleGET()
     std::string uri = _client.getRequest().getUri();
     std::cout << "Valor da URI: " << uri << std::endl;
     std::string data = readData(uri);
-    std::string errorPath;
+    std::cout << "Data do get:" << data << std::endl;
+	std::string errorPath;
 	
+
 	if (!data.empty()) 
 	{
+		std::cout << "Entrou aqui data certo" << std::endl;
         _body = data;
         setStatus(200);
         setHeader("200 OK", "text/html");
     } 
 	else 
 	{	
+		std::cout << "Entrou aqui data errado" << std::endl;
         errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
@@ -297,7 +301,7 @@ void Response::handlePOST()
 	std::cout << "PATH DO POST: " << path << std::endl;
 
 	
-	if (path.empty() || cgiExists(path)) // Alteração de alan
+	if (path.empty()) // Alteração de alan
 	{
 		std::string errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
