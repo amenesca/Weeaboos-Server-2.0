@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 17:20:03 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 17:42:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,6 +167,10 @@ std::string Response::CreatePath(const std::string& uri)
 			}
 		}
 	}
+	else
+	{
+		return "ERRO403";
+	}
 	return path;
 }
 
@@ -279,6 +283,11 @@ std::string Response::createErrorPath(int errorStatus)
 	{
 		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[5];
 	}
+	if (errorStatus == 403)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[6];
+		
+	}
 	return path;
 }
 
@@ -311,6 +320,16 @@ void Response::handleGET()
 		_body = readStaticFile(errorPath);
         setStatus(405);
         setHeader("405 Method Not Allowed", "text/html");
+		send();
+		return;
+	}
+	if (path == "ERRO403")
+	{
+		errorPath = createErrorPath(403);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(403);
+        setHeader("403 Forbidden", "text/html");
 		send();
 		return;
 	}

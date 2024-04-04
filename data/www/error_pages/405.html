@@ -52,7 +52,7 @@
 			color: #ff7d10;
 			font-size: 1.25em;
 		}
-		input {
+		a {
 			font-family: "Workbench", sans-serif;
   			font-optical-sizing: auto;
   			font-weight: 400;
@@ -69,17 +69,12 @@
 			transition: all 0.25s;
 			margin-top: 3.2360679775em;
 		}
-		input:hover {
+		a:hover {
 			color: #ffb238;
 			color: #ffb238;
 			box-shadow: 0 0.5em 3em -0.5em #ffb238;
 			transform: translateY(-0.25em);
 			cursor: pointer;
-		}
-
-		input:active {
-			transform: translateY(0.25em);
-			box-shadow: 0 0.5em 2em -0.5em #ffb238;
 		}
 
 	</style>
@@ -89,9 +84,7 @@
 		<h1>Oops!</h1>
 		<h2>405 - Method not allowed</h2>
 		<p>Sorry I can't deal with that right now...</p>
-		<form action="/" method="get">
-			<input type="submit" value="Go to Homepage">
-		</form>
+		<a target="_blank" href="http://localhost:8008/">Página inicial</a>
 	</div>
 </body>
 </html>
