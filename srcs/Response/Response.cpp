@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 15:58:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 16:30:58 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,10 +151,8 @@ std::string Response::CreatePath(const std::string& uri)
 	return path;
 }
 
-std::string Response::readData(const std::string& uri)
+std::string Response::readData(const std::string& path)
 {
-    std::string path = CreatePath(uri);
-
     std::cout << "PATH RESPONSE: " << path << std::endl;
 
     // Verifica se o recurso é um script CGI
@@ -258,6 +256,10 @@ std::string Response::createErrorPath(int errorStatus)
 	{
 		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[4];
 	}
+	if (errorStatus == 500)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[5];
+	}
 	return path;
 }
 
@@ -279,27 +281,39 @@ void Response::handleGET()
 {
     std::string uri = _client.getRequest().getUri();
     std::cout << "Valor da URI: " << uri << std::endl;
-    std::string data = readData(uri);
+	std::string path = CreatePath(uri);
 //    std::cout << "Data do get:" << data << std::endl;
 	std::string errorPath;
 	
 
-	if (!data.empty()) 
+	if (path.empty()) 
 	{
-		std::cout << "Entrou aqui data certo" << std::endl;
-        _body = data;
-        setStatus(200);
-        setHeader("200 OK", "text/html");
-    } 
-	else 
-	{	
 		std::cout << "Entrou aqui data errado" << std::endl;
         errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(404);
         setHeader("404 Not Found", "text/html");
+    } 
+    
+	std::string data = readData(path);
+	
+	if (data.empty()) 
+	{	
+		std::cout << "Entrou aqui data errado" << std::endl;
+        errorPath = createErrorPath(500);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(500);
+        setHeader("500 Internal Server Error", "text/html");
     }
+	else
+	{
+		std::cout << "Entrou aqui data certo" << std::endl;
+        _body = data;
+        setStatus(200);
+        setHeader("200 OK", "text/html");
+	}
     send();
 }
 
@@ -309,16 +323,7 @@ void Response::handlePOST()
     std::string path = CreatePath(this->_client.getRequest().getUri());
 	std::cout << "PATH DO POST: " << path << std::endl;
 
-	if (static_cast<int>(bodyData.size()) > _client.getServerConfigs().getMaxBodySize())
-	{
-		std::string errorPath = createErrorPath(413);
-		std::cout << "Error Path: " << errorPath << std::endl;
-		_body = readStaticFile(errorPath);
-        setStatus(413);
-        setHeader("413 Request Entity Too Large", "text/html");
-		send();
-		return;
-	}
+	
 	if (path.empty()) // Alteração de alan
 	{
 		std::string errorPath = createErrorPath(404);
@@ -329,14 +334,27 @@ void Response::handlePOST()
 		send();
 		return;
 	} // fim da alteração de alan
-    if (bodyData.empty())
+    else if (bodyData.empty())
 	{
         std::string errorPath = createErrorPath(400);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(400);
         setHeader("400 Bad Request", "text/plain");
-    } 
+    }
+	else if (static_cast<int>(bodyData.size()) > _client.getServerConfigs().getMaxBodySize())
+	{
+		std::cout << "Body Size: " << static_cast<int>(bodyData.size()) << std::endl;
+		std::cout << "Max Body Size: " <<_client.getServerConfigs().getMaxBodySize() << std::endl;
+		
+		std::string errorPath = createErrorPath(413);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(413);
+        setHeader("413 Request Entity Too Large", "text/html");
+		send();
+		return;
+	}
 	else
 	{
         // Assume que o POST é sempre para um script CGI
