@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 14:39:36 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 15:58:36 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,6 +254,10 @@ std::string Response::createErrorPath(int errorStatus)
 	{
 		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[3];
 	}
+	if (errorStatus == 413)
+	{
+		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[4];
+	}
 	return path;
 }
 
@@ -305,7 +309,16 @@ void Response::handlePOST()
     std::string path = CreatePath(this->_client.getRequest().getUri());
 	std::cout << "PATH DO POST: " << path << std::endl;
 
-	
+	if (static_cast<int>(bodyData.size()) > _client.getServerConfigs().getMaxBodySize())
+	{
+		std::string errorPath = createErrorPath(413);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(413);
+        setHeader("413 Request Entity Too Large", "text/html");
+		send();
+		return;
+	}
 	if (path.empty()) // Alteração de alan
 	{
 		std::string errorPath = createErrorPath(404);
