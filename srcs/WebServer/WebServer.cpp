@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 16:00:11 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 14:06:55 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -268,7 +268,7 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 
 		std::string response = makeResponse.getHttpMessage();
 
-		std::cout << response << std::endl;
+		//std::cout << response << std::endl;
 
 		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
 

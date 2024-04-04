@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/03 16:52:07 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/04 13:53:48 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -202,7 +202,7 @@ std::string Response::executeCGI(const std::string& scriptPath)
     else
     {
         // Estamos no processo pai
-
+        waitpid(pid, NULL, 0);
         // Fecha o lado de escrita do pipe
         close(pipefd[1]);
 
@@ -213,7 +213,6 @@ std::string Response::executeCGI(const std::string& scriptPath)
         while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
             ss.write(buffer, bytesRead);
         }
-        waitpid(pid, NULL, 0);
 
         return ss.str();
     }
@@ -322,14 +321,12 @@ void Response::handlePOST()
 	else
 	{
         // Assume que o POST é sempre para um script CGI
-        std::string response = executeCGI(path);
         CgiHandler cgiHandler(_client.getRequest());
-        cgiHandler.postCgi(_client);
+        std::string response = cgiHandler.postCgi(_client);
         _body = response;
         setStatus(200);
         setHeader("200 OK", "text/html");
     }
-
     send();
 }
 
