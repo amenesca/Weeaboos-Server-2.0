@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/05 12:20:11 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/05 14:23:22 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -182,6 +182,14 @@ std::string Response::extractQueryString(const std::string& uri)
     }
 
     return (queryString);
+}
+
+std::string Response::deleteFile(const std::string& path)
+{
+    if (remove(path.c_str()) != 0)
+        return "Failed to delete the file";
+    else
+        return "File deleted successfully";
 }
 
 std::string Response::readData(const std::string& path, const std::string& query)
@@ -440,6 +448,59 @@ void Response::handlePOST()
     send();
 }
 
+bool Response::fileExists(const std::string& path)
+{
+	std::ifstream file(path.c_str());
+	if (!file.is_open())
+	{
+		return false;
+	}
+	file.close();
+	return true;
+}
+
+void Response::handleDELETE()
+{
+	std::string uri = _client.getRequest().getUri();
+    std::string path = CreatePath(uri);
+    std::string errorPath;
+
+    if (path == "ERRO405") {
+		errorPath = createErrorPath(405);
+		_body = readStaticFile(errorPath);
+		setStatus(405);
+		setHeader("405 Method Not Allowed", "text/html");
+		send();
+        return;
+    }
+
+    if (path.empty() || !fileExists(path)) {
+		errorPath = createErrorPath(404);
+		_body = readStaticFile(errorPath);
+		setStatus(404);
+		setHeader("404 Not Found", "text/html");
+		send();
+        return;
+    }
+
+    // Realizar a exclusão do recurso
+    if (remove(path.c_str()) != 0) {
+		errorPath = createErrorPath(500);
+		_body = readStaticFile(errorPath);
+		setStatus(500);
+		setHeader("500 Internal Server Error", "text/html");
+		send();
+        return;
+    }
+	RequestParser _request(_client.getRequest());
+	std::string query = extractQueryString(_request.getUri());
+	std::string data = executeCGI(path, query);
+	_body = data;
+    setStatus(200);
+    setHeader("200 OK", "text/plain");
+    send();
+}
+
 void Response::httpMethods()
 {
     if (_client.getRequest().getMethod() == "GET") {
@@ -448,6 +509,9 @@ void Response::httpMethods()
     else if (_client.getRequest().getMethod() == "POST") {
         handlePOST();
     }
+	else if (_client.getRequest().getMethod() == "DELETE") {
+		handleDELETE();
+	}
     else {
         std::string errorPath = createErrorPath(405);
 		_body = readStaticFile(errorPath);

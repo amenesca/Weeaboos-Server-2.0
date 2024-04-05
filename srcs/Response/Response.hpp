@@ -41,7 +41,9 @@ class Response {
 		bool 		isCGIScript(const std::string& path);
 		std::string executeCGI(const std::string& path, const std::string& queryString);
 		std::string readStaticFile(const std::string& filePath);
+		std::string deleteFile(const std::string& path);
 		bool		MethodIsAllowed(int j);
+		bool		fileExists(const std::string& path);
 
 
         void    send();
@@ -49,4 +51,5 @@ class Response {
 		
 		void handleGET();
 		void handlePOST();
+		void handleDELETE();
 };

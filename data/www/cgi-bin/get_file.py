@@ -24,7 +24,15 @@ print("</head>")
 print("<body>")
 print("<h1>Upload Result</h1>")
 print(f"<p>{message}</p>")
-print(f'<img src="tmp/{fileitem.filename}" alt="Uploaded image" />')
+print('<a href="../">Voltar</a>')
+if fileitem.filename:
+    print(f'<a href="tmp/{fileitem.filename}" target="_blank">View File</a>')
+    print('<form action="delete.py" method="delete">')
+    print(f'<input type="hidden" name="filename" value="{fileitem.filename}">')
+    print('<input type="submit" value="Delete File">')
+    print('</form>')
+if fileitem.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.gif')):
+    print(f'<img src="tmp/{fileitem.filename}" alt="Uploaded image" />')
 print("</body>")
 print("</html>")
 
