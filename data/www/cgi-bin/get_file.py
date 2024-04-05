@@ -15,8 +15,10 @@ else:
    message = 'No file was uploaded'
 
 
-print("<html>")
+print('<html lang="pt-br">')
 print("<head>")
+print('<meta charset="UTF-8">')
+print('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
 print("<title>Upload Result</title>")
 print("</head>")
 print("<body>")

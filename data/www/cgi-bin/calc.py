@@ -23,9 +23,10 @@ elif operator == 'divide':
         result = "Erro: Divisao por zero"
 
 # Imprime o cabeçalho HTTP e o resultado
-print("Content-type:text/html\r\n\r\n")
-print("<html>")
+print('<html lang="pt-br">')
 print("<head>")
+print('<meta charset="UTF-8">')
+print('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
 print("<title>Resultado</title>")
 print("</head>")
 print("<body>")
