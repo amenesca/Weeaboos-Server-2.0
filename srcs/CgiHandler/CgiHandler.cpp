@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 14:09:25 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/05 12:04:53 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,19 +141,6 @@ std::vector<char*> CgiHandler::createEnv(std::map<std::string, std::string> requ
 	return (_env);
 }
 
-std::string CgiHandler::extractQueryString(const std::string& uri)
-{
-    std::string queryString;
-
-    size_t pos = uri.find('?');
-
-    if (pos != std::string::npos) {
-        queryString = uri.substr(pos + 1);
-    }
-
-    return (queryString);
-}
-
 std::string UriWithoutQuery(const std::string& uri)
 {
 	    std::string uri_without_query;
@@ -170,7 +157,7 @@ std::string UriWithoutQuery(const std::string& uri)
 	return uri_without_query;
 }
 
-int CgiHandler::getCgi(Client client)
+/*int CgiHandler::getCgi(Client client)
 {
 	int response_pipe[2];
 	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
@@ -229,7 +216,7 @@ int CgiHandler::getCgi(Client client)
 		return (1);
 	}
 	return (0);
-}
+}*/
 
 std::string CgiHandler::postCgi(Client client)
 {
@@ -267,8 +254,8 @@ std::string CgiHandler::postCgi(Client client)
 		std::string root = client.getServerConfigs().getRoot();
 		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
 		std::cout << "PATH: " << path << std::endl;
-		std::string querry = extractQueryString(_request.getUri());
-		std::cout << "QUERY: " << querry << std::endl;
+		/*std::string querry = extractQueryString(_request.getUri());
+		std::cout << "QUERY: " << querry << std::endl;*/
 		argv.push_back(strdup(path.c_str()));
 		argv.push_back(NULL);
 		if (access(path.c_str(), X_OK) == -1) {
