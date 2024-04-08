@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/05 14:23:22 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:14:03 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,6 @@ bool Response::isCGIScript(const std::string& path)
 
 std::string Response::executeCGI(const std::string& path, const std::string& queryString)
 {
-	std::cout << "PASSOU PELO CGI" << std::endl;
     int pipefd[2];
     pipe(pipefd);
 
@@ -254,20 +253,20 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 	return ("");
 }
 
-std::string Response::readStaticFile(const std::string& filePath)
+std::string Response::readStaticFile(const std::string& path)
 {
-    std::ifstream file(filePath.c_str());
+    std::ifstream file(path.c_str());
     if (!file.is_open())
 	{
-        std::cerr << "Error opening file: " << filePath << std::endl;
+        std::cerr << "Error opening file: " << path << std::endl;
         return "";
     }
 
-    std::stringstream ss;
-    ss << file.rdbuf();
+    std::stringstream new_string;
+    new_string << file.rdbuf();
     file.close();
 
-    return ss.str();
+    return (new_string.str());
 }
 
 std::string Response::createErrorPath(int errorStatus)
@@ -305,13 +304,11 @@ int	cgiExists(const std::string& pathToCgi)
 {
 	 std::ifstream file(pathToCgi.c_str());
     if (!file.is_open())
-	{
-        return 1;
-    } 
+        return (1);
 	else
 	{
 		file.close();
-		return 0;
+		return (0);
 	}
 }
 
@@ -344,9 +341,7 @@ void Response::handleGET()
 	
 	std::ifstream index;
 	if (!path.empty())
-	{
 		index.open(path.c_str());
-	}
 	
 	if (path.empty() || !index.is_open()) 
 	{
@@ -400,9 +395,7 @@ void Response::handlePOST()
 
 	std::ifstream index;
 	if (!path.empty())
-	{
 		index.open(path.c_str());
-	}
 	
 	if (path.empty() || !index.is_open())
 	{
@@ -452,53 +445,9 @@ bool Response::fileExists(const std::string& path)
 {
 	std::ifstream file(path.c_str());
 	if (!file.is_open())
-	{
-		return false;
-	}
+		return (false);
 	file.close();
-	return true;
-}
-
-void Response::handleDELETE()
-{
-	std::string uri = _client.getRequest().getUri();
-    std::string path = CreatePath(uri);
-    std::string errorPath;
-
-    if (path == "ERRO405") {
-		errorPath = createErrorPath(405);
-		_body = readStaticFile(errorPath);
-		setStatus(405);
-		setHeader("405 Method Not Allowed", "text/html");
-		send();
-        return;
-    }
-
-    if (path.empty() || !fileExists(path)) {
-		errorPath = createErrorPath(404);
-		_body = readStaticFile(errorPath);
-		setStatus(404);
-		setHeader("404 Not Found", "text/html");
-		send();
-        return;
-    }
-
-    // Realizar a exclusão do recurso
-    if (remove(path.c_str()) != 0) {
-		errorPath = createErrorPath(500);
-		_body = readStaticFile(errorPath);
-		setStatus(500);
-		setHeader("500 Internal Server Error", "text/html");
-		send();
-        return;
-    }
-	RequestParser _request(_client.getRequest());
-	std::string query = extractQueryString(_request.getUri());
-	std::string data = executeCGI(path, query);
-	_body = data;
-    setStatus(200);
-    setHeader("200 OK", "text/plain");
-    send();
+	return (true);
 }
 
 void Response::httpMethods()
@@ -509,9 +458,6 @@ void Response::httpMethods()
     else if (_client.getRequest().getMethod() == "POST") {
         handlePOST();
     }
-	else if (_client.getRequest().getMethod() == "DELETE") {
-		handleDELETE();
-	}
     else {
         std::string errorPath = createErrorPath(405);
 		_body = readStaticFile(errorPath);
