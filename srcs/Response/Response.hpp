@@ -2,9 +2,10 @@
 
 # include "../CgiHandler/CgiHandler.hpp"
 # include "../Client/Client.hpp"
+# include "../RequestParser/RequestParser.hpp"
 # include <fstream>
-#include <sys/wait.h> // Para a função waitpid
-#include <sys/types.h> // Para a função waitpid
+#include <sys/wait.h> 
+#include <sys/types.h>
 
 class Response {
     private:
@@ -15,6 +16,7 @@ class Response {
 		std::string		_httpMessage;
 		CgiHandler		_cgiHandler;
 		ServerLog		_log;
+		RequestParser	_request;
     public:
         Response();
        	Response(const Client& client);
@@ -34,11 +36,14 @@ class Response {
 		std::string	toString(int number);
 		std::string CreatePath(const std::string& uri);
 		std::string createErrorPath(int errorStatus);
-		std::string	readData(const std::string& path);
+		std::string extractQueryString(const std::string& uri);
+		std::string	readData(const std::string& path, const std::string& query);
 		bool 		isCGIScript(const std::string& path);
-		std::string executeCGI(const std::string& scriptPath);
+		std::string executeCGI(const std::string& path, const std::string& queryString);
 		std::string readStaticFile(const std::string& filePath);
+		std::string deleteFile(const std::string& path);
 		bool		MethodIsAllowed(int j);
+		bool		fileExists(const std::string& path);
 
 
         void    send();
@@ -46,4 +51,5 @@ class Response {
 		
 		void handleGET();
 		void handlePOST();
+		void handleDELETE();
 };

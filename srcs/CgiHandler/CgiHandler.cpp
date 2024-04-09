@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/04 14:09:25 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/05 13:34:11 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,94 +141,17 @@ std::vector<char*> CgiHandler::createEnv(std::map<std::string, std::string> requ
 	return (_env);
 }
 
-std::string CgiHandler::extractQueryString(const std::string& uri)
-{
-    std::string queryString;
-
-    size_t pos = uri.find('?');
-
-    if (pos != std::string::npos) {
-        queryString = uri.substr(pos + 1);
-    }
-
-    return (queryString);
-}
-
 std::string UriWithoutQuery(const std::string& uri)
 {
-	    std::string uri_without_query;
-
-    // Encontra a posição do caractere '?'
+	std::string uri_without_query;
     size_t pos = uri.find('?');
 
-    // Se '?' foi encontrado, extrai a parte da URI antes dele
     if (pos != std::string::npos) {
         uri_without_query = uri.substr(0, pos);
     } else {
-        uri_without_query = uri; // Se não houver '?', usa a URI completa
+        uri_without_query = uri;
     }
 	return uri_without_query;
-}
-
-int CgiHandler::getCgi(Client client)
-{
-	int response_pipe[2];
-	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
-
-	if (pipe(response_pipe) == -1)
-    {
-        std::cerr << "Error creating pipe: " << strerror(errno) << std::endl;
-    	exit(1);
-    }
-
-	_pid = fork();
-	_active = true;
-	if (_pid == -1)
-	{
-		std::cerr << "Error on fork: " << strerror(errno) << std::endl;
-		exit (1);
-	}
-	else if (_pid == 0)
-	{
-		std::vector<char*> argv;
-		std::string path;
-		std::string root = client.getServerConfigs().getRoot();
-		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
-		std::cout << "PATH: " << path << std::endl;
-		std::string querry = extractQueryString(_request.getUri());
-		std::cout << "QUERY: " << querry << std::endl;
-		argv.push_back(strdup(path.c_str()));
-		argv.push_back(NULL);
-		if (close(response_pipe[0]) == -1) {
-  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
-  			exit(1);
-		}
-		if (dup2(response_pipe[1], STDOUT_FILENO) == -1) {
-  			std::cerr << "Error on dup2: " << strerror(errno) << std::endl;
-  			exit(1);
-		}
-		if (close(response_pipe[1]) == -1) {
-  			std::cerr << "Error on close: " << strerror(errno) << std::endl;
-  			exit(1);
-		}
-		//_log.createLog();
-		
-		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
-			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
-			exit(1);
-		}
-		return (0);
-	}
-	else
-	{
-		close(response_pipe[1]);
-		if (!checkAvailability(response_pipe[0]))
-		{
-			return (-1);
-		}
-		return (1);
-	}
-	return (0);
 }
 
 std::string CgiHandler::postCgi(Client client)
@@ -266,9 +189,6 @@ std::string CgiHandler::postCgi(Client client)
 		std::string path;
 		std::string root = client.getServerConfigs().getRoot();
 		path = root + "/" + UriWithoutQuery(_request.getUri().substr(1));
-		std::cout << "PATH: " << path << std::endl;
-		std::string querry = extractQueryString(_request.getUri());
-		std::cout << "QUERY: " << querry << std::endl;
 		argv.push_back(strdup(path.c_str()));
 		argv.push_back(NULL);
 		if (access(path.c_str(), X_OK) == -1) {
@@ -322,7 +242,6 @@ std::string CgiHandler::postCgi(Client client)
 		}
 		close(_request_pipe[1]);
 		close(response_pipe[0]);
-		//std::cout << "RESPONSE BODY: " << responseBody << std::endl;
 		return (responseBody);
 	}
 	return ("");
@@ -361,23 +280,6 @@ bool        CgiHandler::writePipes(std::string message)
     }
     return (true);
 }
-
-/*bool CgiHandler::writePipes(std::string message, size_t contentLength)
-{
-    size_t bytesWritten = 0;
-    size_t bufferSize = 4096; // Tamanho do buffer para cada parte da imagem
-    while (bytesWritten < contentLength)
-    {
-        size_t bytesToWrite = std::min(bufferSize, contentLength - bytesWritten);
-        ssize_t bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, bytesToWrite);
-        if (bytes == -1)
-        {
-            return false;
-        }
-        bytesWritten += bytes;
-    }
-    return true;
-}*/
 
 int	CgiHandler::readPipes(int fd)
 {

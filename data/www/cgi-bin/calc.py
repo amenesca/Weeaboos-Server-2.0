@@ -4,12 +4,23 @@ import cgi
 # Recebe os parâmetros da URL
 form = cgi.FieldStorage()
 
-# Obtém os valores dos parâmetros
+if form.getvalue('num1') is None or form.getvalue('num2') is None or form.getvalue('operator') is None:
+    print('<html lang="pt-br">')
+    print("<head>")
+    print('<meta charset="UTF-8">')
+    print('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
+    print("<title>Erro</title>")
+    print("</head>")
+    print("<body>")
+    print("<h2>Erro: Parametros não informados</h2>")
+    print("</body>")
+    print("</html>")
+    exit()
+
 num1 = float(form.getvalue('num1'))
 num2 = float(form.getvalue('num2'))
 operator = form.getvalue('operator')
 
-# Verifica se os campos estão vazios
 if operator == 'add':
     result = num1 + num2
 elif operator == 'subtract':
@@ -22,10 +33,10 @@ elif operator == 'divide':
     else:
         result = "Erro: Divisao por zero"
 
-# Imprime o cabeçalho HTTP e o resultado
-print("Content-type:text/html\r\n\r\n")
-print("<html>")
+print('<html lang="pt-br">')
 print("<head>")
+print('<meta charset="UTF-8">')
+print('<meta name="viewport" content="width=device-width, initial-scale=1.0">')
 print("<title>Resultado</title>")
 print("</head>")
 print("<body>")
