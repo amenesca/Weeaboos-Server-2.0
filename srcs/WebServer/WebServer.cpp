@@ -171,19 +171,23 @@ void	WebServer::StartServer(void)
 		}
 
 		// Verificar se tem entrada nos clientes, se existir
-		for (size_t j = this->_nbrServers; j < this->_pollFds.size(); j++)
+		for (size_t i = 0; i < this->_Clients.size(); i++)
 		{
-			if (_pollFds[j].revents & POLLIN)
+			int pollPos = this->_Clients[i].getPollPos();
+			// fazer uma variável do numero de clientes conectados
+			// usar isso para fazer a iteração
+			// usar o pollPos de cada cliente para monitorar
+			if (_pollFds[pollPos].revents & POLLIN)
 			{
-				if (treatRequest(j - this->_nbrServers, j) == -1)
-					j--;
+				if (treatRequest(i, pollPos) == -1)
+					i--;
 			}
-			else if (_pollFds[j].revents & POLLOUT)
+			else if (_pollFds[pollPos].revents & POLLOUT)
 			{
-				if (treatResponse(j - this->_nbrServers, j) == -1)
-					j--;
+				if (treatResponse(i, pollPos) == -1)
+					i--;
 			}
-			else if(isPollError(j))
+			else if(isPollError(pollPos))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
 				serverRunning = false;
@@ -230,7 +234,7 @@ void	WebServer::openNewConnection(int i)
 	newClient.setServerConfigs(this->_vServers[i]);
 
 	this->addNewClientSockToPoll(newClient.getClientSocket());
-
+	newClient.setPollPos(this->_pollFds.size() - 1);
 	this->_Clients.push_back(newClient);
 }
 

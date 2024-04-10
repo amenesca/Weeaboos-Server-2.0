@@ -22,7 +22,8 @@ Client::Client() :
 	_firstTimeRequest(true),
 	_serverConfigs(),
 	_requestParser(),
-	_totalBodyBytes(0)
+	_totalBodyBytes(0),
+	_pollPos(0)
 {
 	
 }
@@ -37,6 +38,7 @@ Client::~Client()
 	this->_requestBuffer.clear();
 	this->_bytesRead = 0;
 	this->_totalBodyBytes = 0;
+	this->_pollPos = 0;
 }
 
 Client::Client(const Client& copy)
@@ -59,6 +61,7 @@ Client& Client::operator=(const Client& src)
 		this->_requestRead = src.getRequestRead();
 		this->_firstTimeRequest = src.getFirstTimeRequest();
 		this->_totalBodyBytes = src.getTotalBodyBytes();
+		this->_pollPos = src.getPollPos();
 	}
 	return *this;
 }
@@ -128,6 +131,11 @@ const time_t& Client::getStartTime(void) const
 	return this->_start_time;
 }
 
+int Client::getPollPos(void) const
+{
+	return this->_pollPos;
+}
+
 void	Client::setStart_time(time_t start_time)
 {
 	this->_start_time = start_time;
@@ -176,6 +184,11 @@ void Client::setRequestRead(const bool& requestRead)
 void Client::setFirstTimeRequest(const bool& firstTimeRequest)
 {
 	this->_firstTimeRequest = firstTimeRequest;
+}
+
+void Client::setPollPos(int z)
+{
+	this->_pollPos = z;
 }
 
 std::string Client::u_int8_to_string(const u_int8_t* data, size_t size)
