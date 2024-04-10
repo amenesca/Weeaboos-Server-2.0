@@ -32,7 +32,7 @@ class Client
 		ssize_t				_totalBodyBytes;
 		time_t				_start_time;
 
-		int					_totalMonitoredFds;
+		int					_pollPos;
 		
     public:
         Client();
@@ -52,7 +52,7 @@ class Client
 		bool			getFirstTimeRequest(void) const;
 		ssize_t			getTotalBodyBytes(void) const;
 		const time_t&	getStartTime(void) const;
-		int				getTotalMonitoredFds(void) const;
+		int				getPollPos(void) const;
 		
         sockaddr_in	*getClientAddrPointer(void);
         socklen_t	*getClientAddrLenPointer(void);
@@ -67,8 +67,7 @@ class Client
 		void		setRequestRead(const bool& requestRead);
 		void		setFirstTimeRequest(const bool& firstTimeRequest);
 		void		setStart_time(time_t start_time);
-		void		addMonitoredFd(void);
-		void		removeMonitoredFd(void);
+		void		setPollPos(int z);
 
 		short int	receiveRequest(int client);
 		std::string u_int8_to_string(const uint8_t* data, size_t size);
