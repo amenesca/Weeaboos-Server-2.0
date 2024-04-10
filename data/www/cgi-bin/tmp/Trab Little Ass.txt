@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct noh {
+    int valor;
+    struct noh *prox;
+    struct noh *ant;
+} noh;
+
+void inserir_no_inicio(noh **lista, int valor) {
+    noh *novo = malloc(sizeof(noh));
+    novo->valor = valor;
+    novo->prox = NULL;
+    novo->ant = NULL;
+
+    if (*lista == NULL) {
+        *lista = novo;
+    } else {
+        novo->prox = *lista;
+        (*lista)->ant = novo;
+        *lista = novo;
+    }
+}
+
+void inserir_no_final(noh **lista, int valor) {
+    noh *novo = malloc(sizeof(noh));
+    novo->valor = valor;
+    novo->prox = NULL;
+    novo->ant = NULL;
+
+    if (*lista == NULL) {
+        *lista = novo;
+    } else {
+        noh *aux = *lista;
+        while (aux->prox != NULL) {
+            aux = aux->prox;
+        }
+        aux->prox = novo;
+        novo->ant = aux;
+    }
+}
+
+void remover_no(noh **lista, int valor) {
+    noh *aux = *lista;
+    while (aux != NULL && aux->valor != valor) {
+        aux = aux->prox;
+    }
+
+    if (aux == NULL) {
+        return;
+    }
+
+    if (aux->prox == NULL) {
+        aux->ant->prox = NULL;
+    } else {
+        aux->ant->prox = aux->prox;
+        aux->prox->ant = aux->ant;
+    }
+
+    free(aux);
+}
+
+void imprimir_lista(noh *lista) {
+    while (lista != NULL) {
+        printf("%d ", lista->valor);
+        lista = lista->prox;
+    }
+    printf("\n");
+}
+
+int main() {
+    noh *lista = NULL;
+    inserir_no_inicio(&lista, 50);
+    inserir_no_inicio(&lista, 40);
+    inserir_no_inicio(&lista, 30);
+    inserir_no_inicio(&lista, 20);
+    inserir_no_inicio(&lista, 10);
+    imprimir_lista(lista);
+    remover_no(&lista, 40);
+    imprimir_lista(lista);
+    return 0;
+}

@@ -89,6 +89,12 @@ void RequestParser::parse(std::string request)
     // Header parsing
     while(std::getline(requestStream, headerLine) && headerLine != "\r\n\r\n")
 	{
+		if (headerLine == "\r")
+		{
+			std::cout << "Entrou aqui deu certo!" << std::endl;
+			break;
+		}
+
         size_t separator = headerLine.find(": ");
         if (separator != std::string::npos)
 		{
