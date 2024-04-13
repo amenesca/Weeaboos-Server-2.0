@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/08 13:14:03 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/10 14:34:33 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -441,6 +441,52 @@ void Response::handlePOST()
     send();
 }
 
+void Response::handleDELETE()
+{
+	std::string path = CreatePath(_client.getRequest().getUri());
+	std::string errorPath;
+	
+	if (path == "ERRO405")
+	{
+		errorPath = createErrorPath(405);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(405);
+        setHeader("405 Method Not Allowed", "text/html");
+		send();
+		return;
+	}
+	if (path == "ERRO403")
+	{
+		errorPath = createErrorPath(403);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(403);
+        setHeader("403 Forbidden", "text/html");
+		send();
+		return;
+	}
+	
+	if (!fileExists(path))
+	{
+		errorPath = createErrorPath(404);
+		std::cout << "Error Path: " << errorPath << std::endl;
+		_body = readStaticFile(errorPath);
+        setStatus(404);
+        setHeader("404 Not Found", "text/html");
+		send();
+		return;
+	}
+	else
+	{
+		std::string response = deleteFile(path);
+		_body = response;
+		setStatus(200);
+		setHeader("200 OK", "text/html");
+	}
+	send();
+}
+
 bool Response::fileExists(const std::string& path)
 {
 	std::ifstream file(path.c_str());
@@ -458,10 +504,13 @@ void Response::httpMethods()
     else if (_client.getRequest().getMethod() == "POST") {
         handlePOST();
     }
+	else if (_client.getRequest().getMethod() == "DELETE") {
+		handleDELETE();
+	}
     else {
         std::string errorPath = createErrorPath(405);
 		_body = readStaticFile(errorPath);
-        setStatus(405); // 405 =  Method Not Allowed
+        setStatus(405);
         setHeader("405 Method Not Allowed", "text/plain");
     }
     return ;
