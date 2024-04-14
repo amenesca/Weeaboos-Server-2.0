@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/04 16:17:27 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:51:41 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -254,12 +254,7 @@ void ConfigParser::treatLocation(VirtualServer* currentServer, std::string locat
 			locationInstance.setCgiExtension(split(buff)[1]);
 			continue;
 		}
-		else if (buff.find("upload", 0) != std::string::npos && \
-		buff.find("}") == std::string::npos)
-		{
-			locationInstance.setUpload(split(buff)[1]);
-			continue;
-		}
+		
 		else if (buff.find("index", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
@@ -268,13 +263,19 @@ void ConfigParser::treatLocation(VirtualServer* currentServer, std::string locat
 			locationInstance.setIndex(split(buff));
 			continue;
 		}
+		// else if (buff.find("upload", 0) != std::string::npos && \
+		// buff.find("}") == std::string::npos)
+		// {
+		// 	locationInstance.setUpload(split(buff)[1]);
+		// 	continue;
+		// }
 		else if (buff.find("autoindex", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setAutoIndex(treatAutoIndex(split(buff)[1]));
 			continue;
 		}
-		else if (buff.find("methods", 0) != std::string::npos && \
+		else if (buff.find("allow_methods", 0) != std::string::npos && \
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setMethods(split(buff));
