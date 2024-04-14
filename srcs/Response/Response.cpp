@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/10 14:34:33 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:52:19 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,9 @@ bool	Response::MethodIsAllowed(int j)
 	{
 		if (AllowedMethods[i] == currentMethod)
 		{
+			std::cout << "Entered here" << std::endl;
 			return true;
+			break;
 		}
 	}
 	return false;
@@ -159,7 +161,10 @@ std::string Response::CreatePath(const std::string& uri)
 			if (serverLocations[j].getPath() == uri_without_query) 
 			{
 				if (!MethodIsAllowed(j))
+				{
+					std::cout << "teste 1" << std::endl;
 					return "ERRO405";
+				}
 				path = _client.getServerConfigs().getRoot() + "/" + serverLocations[j].getIndex()[1];
 				std::cout << "PATH FORMADO: " << path << std::endl;
 				break;
