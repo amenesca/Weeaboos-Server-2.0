@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/13 20:51:41 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/16 14:01:23 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,6 +101,7 @@ std::vector<std::string> ConfigParser::split(const std::string& input) const
 
 	if (tokens.size() <= 1)
 	{
+		std::cout << "Split" << std::endl;
 		throw InvalidArguments();
 	}
     return tokens;
@@ -123,10 +124,12 @@ std::vector<int> ConfigParser::StrVecToIntVecPort(const std::vector<std::string>
         long intValue = std::strtol((*it).c_str(), &endPtr, 10);
 
         if (*endPtr != '\0' || endPtr == (*it).c_str()) {
+			std::cout << "strVVecToIntPort" << std::endl;
             throw InvalidArguments();
         }
 		else if (intValue < 0 || intValue > 65535)
 		{
+			std::cout << "strVVecToIntPort" << std::endl;
             throw InvalidArguments();
         }
 		else
@@ -171,7 +174,10 @@ bool	ConfigParser::isHostValid(std::string & _parameter) const
 
 	i = 0;
 	if ((_parameter.size() > 15) || (_parameter.size() < 7))
+	{
+		std::cout << "hostValid" << std::endl;
 		throw InvalidArguments();
+	}
 	while (i < _parameter.size())
 	{
 		j = 0;
@@ -179,14 +185,24 @@ bool	ConfigParser::isHostValid(std::string & _parameter) const
 								(_parameter[(i + j)] != '.'))
 		{
 			if (!std::isdigit(_parameter[(i + j)]))
+			{
+				std::cout << "hostValid" << std::endl;
 				throw InvalidArguments();
+			}
 			j++;
 		}
 		if ((_parameter[(i + j)] != '.') && ((i + j) < _parameter.size()))
-				throw InvalidArguments();
+		{
+			std::cout << "hostValid" << std::endl;
+			throw InvalidArguments();
+		
+		}
 		nbr = atoi(_parameter.substr(i, j));
 		if ((nbr > 255) || (nbr < 0))
+		{
+			std::cout << "hostValid" << std::endl;
 			throw InvalidArguments();
+		}
 		i += (j + 1);
 	}
 	return (true);
@@ -202,6 +218,7 @@ in_addr_t	ConfigParser::treatHost(std::string buff) const
 	{
 		return inet_addr(buff.c_str());
 	}
+	std::cout << "treatHoast" << std::endl;
 	throw InvalidArguments();
 	return (INADDR_NONE);
 }
@@ -211,11 +228,15 @@ int	ConfigParser::treatMaxBodySize(const std::string& strMaxBodySize) const
 	char* endPtr;
     int intValue = std::strtol(strMaxBodySize.c_str(), &endPtr, 10);
 
-	if (*endPtr != '\0' || endPtr == strMaxBodySize.c_str()) {
+	if (*endPtr != '\0' || endPtr == strMaxBodySize.c_str())
+	{
+		std::cout << "treatMaxBodySize" << std::endl;
+
 		throw InvalidArguments();
 	}
 	else if (intValue <= 0)
 	{
+		std::cout << "treatMaxBodySize" << std::endl;
 		throw InvalidArguments();
 	}
 	
@@ -224,16 +245,17 @@ int	ConfigParser::treatMaxBodySize(const std::string& strMaxBodySize) const
 
 bool ConfigParser::treatAutoIndex(const std::string& _argument) const
 {
-	if (_argument == "true")
+	if (_argument == "on")
 	{
 		return true;
 	}
-	else if (_argument == "false")
+	else if (_argument == "off")
 	{
 		return false;
 	}
 	else
 	{
+		std::cout << "treatAutoIndex" << std::endl;
 		throw InvalidArguments();
 	}
 	return false;
@@ -248,40 +270,41 @@ void ConfigParser::treatLocation(VirtualServer* currentServer, std::string locat
 
 	while (std::getline(this->_configFileStream >> std::ws, buff))
 	{
-		if (buff.find("cgi_extension", 0) != std::string::npos && \
+		if (!buff.compare(0,12,"cgi_extension") && \
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setCgiExtension(split(buff)[1]);
 			continue;
 		}
-		
-		else if (buff.find("index", 0) != std::string::npos && \
+		else if (!buff.compare(0,6,"upload") &&
 		buff.find("}") == std::string::npos)
 		{
-			if (buff.find("autoindex", 0) != std::string::npos)
-				continue;
+			locationInstance.setUpload(split(buff)[1]);
+			continue;
+		}
+		else if (!buff.compare(0,5,"index") && \
+		buff.find("}") == std::string::npos)
+		{
 			locationInstance.setIndex(split(buff));
 			continue;
 		}
-		// else if (buff.find("upload", 0) != std::string::npos && \
-		// buff.find("}") == std::string::npos)
-		// {
-		// 	locationInstance.setUpload(split(buff)[1]);
-		// 	continue;
-		// }
-		else if (buff.find("autoindex", 0) != std::string::npos && \
+		else if (!buff.compare(0,9,"autoindex") && \
 		buff.find("}") == std::string::npos)
 		{
+			if (!buff.compare(0,5,"index"))
+			{
+				continue;
+			}
 			locationInstance.setAutoIndex(treatAutoIndex(split(buff)[1]));
 			continue;
 		}
-		else if (buff.find("allow_methods", 0) != std::string::npos && \
+		else if (!buff.compare(0,13,"allow_methods") && \
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setMethods(split(buff));
 			continue;
 		}
-		else if (buff.find("return", 0) != std::string::npos && \
+		else if (!buff.compare(0, 6,"return") && \
 		buff.find("}") == std::string::npos)
 		{
 			locationInstance.setReturn(split(buff)[1]);
@@ -318,51 +341,51 @@ void ConfigParser::configVServer(VirtualServer* currentServer)
 			rightBrace = true;
 			break ;
 		}
-		else if ((buff.find("listen", 0) != std::string::npos || \
-		buff.find("port", 0) != std::string::npos) && \
+		else if ((!buff.compare(0, 6, "listen") || \
+		!buff.compare(0,4,"port")) && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setPort(StrVecToIntVecPort(split(buff)));
 			continue;
 		}
-		else if (buff.find("root", 0) != std::string::npos && \
+		else if (!buff.compare(0, 4,"root") && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setRoot(split(buff)[1]);
 			continue;
 		}
-		else if (buff.find("server_name", 0) != std::string::npos && \
+		else if (!buff.compare(0, 11,"server_name") && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setServerName(split(buff));
 			continue;
 		}
-		else if (buff.find("host", 0) != std::string::npos && \
+		else if (!buff.compare(0, 4,"host") && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setHost(treatHost(split(buff)[1]));
 			currentServer->setStrHost(split(buff)[1]);
 			continue;
 		}
-		else if (buff.find("index", 0) != std::string::npos && \
+		else if (!buff.compare(0,5,"index") && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setIndex(split(buff));
 			continue;
 		}
-		else if (buff.find("max_body_size", 0) != std::string::npos && \
+		else if (!buff.compare(0,13,"max_body_size") && \
 		buff.find("}") == std::string::npos)
 		{
 			currentServer->setMaxBodySize(treatMaxBodySize(split(buff)[1]));
 			continue;
 		}
-		else if (buff.find("error_page", 0) != std::string::npos  && \
+		else if (!buff.compare(0,10,"error_page") && \
 			buff.find("}") == std::string::npos)
 		{
 			currentServer->setErrorPage(split(buff));
 			continue;
 		}
-		else if (buff.find("location", 0) != std::string::npos && \
+		else if (!buff.compare(0, 8,"location") && \
 		buff.find("}") == std::string::npos) 
 		{
 			if (buff.find("{", buff.size() - 1) == std::string::npos || split(buff).size() != 3)
