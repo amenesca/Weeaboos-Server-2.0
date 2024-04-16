@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/05 13:34:11 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/16 16:50:03 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ CgiHandler::CgiHandler() :
 	_request_pipe(),
 	_request(),
 	_client(),
-	_log()
+	_log(),
+	_pollFds()
 {
 	_env = std::vector<char*>();
 	_pid = 0;
@@ -26,13 +27,14 @@ CgiHandler::CgiHandler() :
 	_request_pipe[1] = 0;
 }
 
-CgiHandler::CgiHandler(RequestParser request) :
+CgiHandler::CgiHandler(RequestParser request, std::vector<pollfd>* pollFds) :
 	_pid(0),
 	_env(),
 	_request_pipe(),
 	_request(request),
 	_client(),
-	_log()
+	_log(),
+	_pollFds(pollFds)
 {
 
 }
@@ -56,6 +58,7 @@ CgiHandler& CgiHandler::operator=(const CgiHandler& src)
 		this->_log = src.getLog();
 		this->_start_time = src._start_time;
 		this->_active = src._active;
+		this->_pollFds = src._pollFds;
 	}
 	return *this;
 }
@@ -157,6 +160,9 @@ std::string UriWithoutQuery(const std::string& uri)
 std::string CgiHandler::postCgi(Client client)
 {
 	int response_pipe[2];
+	int responsePipePos[2];
+	int requestPipePos[2];
+	
 	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
 
 	if (pipe(response_pipe) == -1)
@@ -171,8 +177,12 @@ std::string CgiHandler::postCgi(Client client)
     }
 
 	antiBlock(_request_pipe, response_pipe);
+	requestPipePos[0] = addFdToPoll(_request_pipe[0]);
+	requestPipePos[1] = addFdToPoll(_request_pipe[1]);
+	responsePipePos[0] = addFdToPoll(response_pipe[0]);
+	responsePipePos[1] = addFdToPoll(response_pipe[1]);
 	
-	if (!writePipes(_request.getNewRequestBody())) {
+	if (!writePipes(_request.getNewRequestBody(), requestPipePos)) {
         return ("");
 	}
 
@@ -219,7 +229,8 @@ std::string CgiHandler::postCgi(Client client)
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
 		}
-		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
+		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1)
+		{
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
 			exit(1);
 		}
@@ -231,8 +242,8 @@ std::string CgiHandler::postCgi(Client client)
 		close(response_pipe[1]);
 		char buffer[4096];
 		std::string responseBody;
-		ssize_t bytesRead;
-		while ((bytesRead = read(response_pipe[0], buffer, sizeof(buffer))) > 0) {
+		ssize_t bytesRead = 1;
+		while ((bytesRead = read((*this->_pollFds)[responsePipePos[0]].fd, buffer, sizeof(buffer))) > 0) {
 			responseBody.append(buffer, bytesRead);
 			memset(buffer, 0, sizeof(buffer));
 		}
@@ -242,6 +253,10 @@ std::string CgiHandler::postCgi(Client client)
 		}
 		close(_request_pipe[1]);
 		close(response_pipe[0]);
+		this->_pollFds->erase(this->_pollFds->begin() + requestPipePos[0]);
+		this->_pollFds->erase(this->_pollFds->begin() + requestPipePos[1]);
+		this->_pollFds->erase(this->_pollFds->begin() + responsePipePos[0]);
+		this->_pollFds->erase(this->_pollFds->begin() + responsePipePos[1]);
 		return (responseBody);
 	}
 	return ("");
@@ -263,21 +278,36 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-bool        CgiHandler::writePipes(std::string message)
+int CgiHandler::addFdToPoll(int fd)
 {
+	pollfd newPollFd;
+	std::cout << "Adding new fd number: " << fd << " to poll" << std::endl;
+	newPollFd.fd = fd;
+	newPollFd.events = POLLIN | POLLOUT;
+	newPollFd.revents = 0;
+	this->_pollFds->push_back(newPollFd);
+
+	return (this->_pollFds->size() - 1);
+}
+
+bool        CgiHandler::writePipes(std::string message, int requestPipePos[])
+{
+	// requestPipe
     size_t  bytesWritten;
     ssize_t bytes;
     bytesWritten = 0;
-    while (bytesWritten < message.length())
-    {
-        bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, \
-                    message.length() - bytesWritten);
-        if (bytes == -1)
-        {
-            return (false);
-        }
-        bytesWritten += bytes;
-    }
+	
+	while (bytesWritten < message.length())
+	{
+		bytes = write((*this->_pollFds)[requestPipePos[1]].fd,\
+			message.c_str() + bytesWritten, \
+			message.length() - bytesWritten);
+		if (bytes == -1)
+		{
+			return (false);
+		}
+		bytesWritten += bytes;
+	}
     return (true);
 }
 

@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/16 15:56:57 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/16 16:12:16 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ int	Response::addFdToPoll(int fd)
 {
 	pollfd newPollFd;
 	std::cout << "Adding new fd number: " << fd << " to poll" << std::endl;
-	fcntl(fd, F_SETFL, O_NONBLOCK);
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
 	newPollFd.fd = fd;
 	newPollFd.events = POLLIN | POLLOUT;
 	newPollFd.revents = 0;
@@ -286,20 +286,13 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 std::string Response::readStaticFile(const std::string& path)
 {
 	std::ifstream file;
-	if (path.find(".png"))
-	{
-		file.open(path.c_str(), std::ios::binary);
-	}
-	else
-	{
-		file.open(path.c_str());
-	}
+
+	file.open(path.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error opening file: " << path << std::endl;
 		return "";
 	}
-
 
     std::stringstream new_string;
     new_string << file.rdbuf();
@@ -532,7 +525,7 @@ void Response::handlePOST()
 	}
 	else
 	{
-        CgiHandler cgiHandler(_client.getRequest());
+        CgiHandler cgiHandler(this->_client.getRequest(), this->_pollFds);
         std::string response = cgiHandler.postCgi(_client);
         _body = response;
         setStatus(200);
