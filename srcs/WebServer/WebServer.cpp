@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/04 14:06:55 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/16 15:21:50 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -267,7 +267,7 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 	{
 //		std::cout << "ENTROU AQUI" << std::endl;
 //	std::cout << "Imprimindo Content-Type: " << _Clients[clientPos].getRequest().getHeaders()["Content-Type"] << std::endl;
-		Response makeResponse(_Clients[clientPos]);
+		Response makeResponse(_Clients[clientPos], &this->_pollFds);
 		makeResponse.httpMethods();
 
 		std::string response = makeResponse.getHttpMessage();

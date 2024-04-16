@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/16 14:18:21 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/16 16:12:16 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,19 @@ Response::Response()
     _header(""),
     _httpMessage(""),
 	_cgiHandler(),
-	_request()
+	_request(),
+	_pollFds()
 {}
 
-Response::Response(const Client& client) 
+Response::Response(const Client& client, std::vector<pollfd> *pollfds) 
 :   _client(client),
     _status(0),
     _body(""),
     _header(""),
 	_httpMessage(""),
 	_cgiHandler(),
-	_request()
+	_request(),
+	_pollFds(pollfds)
 {}
 
 Response::~Response() {}
@@ -45,6 +47,7 @@ Response&	Response::operator=(const Response& src)
 		this->_httpMessage = src.getHttpMessage();
 		this->_cgiHandler = src.getCgiHandler();
 		this->_request = src._request;
+		this->_pollFds = src._pollFds;
 	}
 	return *this;
 	
@@ -211,11 +214,27 @@ bool Response::isCGIScript(const std::string& path)
     return (access(path.c_str(), X_OK) == 0);
 }
 
+int	Response::addFdToPoll(int fd)
+{
+	pollfd newPollFd;
+	std::cout << "Adding new fd number: " << fd << " to poll" << std::endl;
+	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
+	newPollFd.fd = fd;
+	newPollFd.events = POLLIN | POLLOUT;
+	newPollFd.revents = 0;
+	this->_pollFds->push_back(newPollFd);
+
+	return (this->_pollFds->size() - 1);
+}
+
 std::string Response::executeCGI(const std::string& path, const std::string& queryString)
 {
     int pipefd[2];
+	int pollPos[2];
     pipe(pipefd);
-
+	
+	pollPos[0] = addFdToPoll(pipefd[0]);
+	pollPos[1] = addFdToPoll(pipefd[1]);
     pid_t pid = fork();
 
     if (pid == -1)
@@ -235,7 +254,7 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 			exit(1);
 		}
 		close(pipefd[0]);
-        dup2(pipefd[1], STDOUT_FILENO);
+        dup2((*this->_pollFds)[pollPos[1]].fd, STDOUT_FILENO);
         close(pipefd[1]);
         if (execve(path.c_str(), args.data(), NULL) == -1) {
             std::cerr << "Failed to execute CGI script" << std::endl;
@@ -244,38 +263,36 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
     }
     else
     {
-        waitpid(pid, NULL, 0);
-        close(pipefd[1]);
+     	waitpid(pid, NULL, 0);
+		close(pipefd[1]);
 
-        std::stringstream new_string;
-        char buffer[4096];
-        ssize_t bytesRead;
-        while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
-            new_string.write(buffer, bytesRead);
-        }
-		close(pipefd[0]);
-        return (new_string.str());
+		std::stringstream new_string;
+		char buffer[4096];
+		ssize_t bytesRead;
+
+		while ((bytesRead = read((*this->_pollFds)[pollPos[0]].fd, buffer, sizeof(buffer))) > 0)
+		{
+			new_string.write(buffer, bytesRead);
+		}
+
+		close(pipefd[0]);      
+		this->_pollFds->erase(this->_pollFds->begin() + pollPos[0]);
+		this->_pollFds->erase(this->_pollFds->begin() + pollPos[1]);
+		return new_string.str();
     }
-	return ("");
+    return "";
 }
 
 std::string Response::readStaticFile(const std::string& path)
 {
 	std::ifstream file;
-	if (path.find(".png"))
-	{
-		file.open(path.c_str(), std::ios::binary);
-	}
-	else
-	{
-		file.open(path.c_str());
-	}
+
+	file.open(path.c_str());
 	if (!file.is_open())
 	{
 		std::cerr << "Error opening file: " << path << std::endl;
 		return "";
 	}
-
 
     std::stringstream new_string;
     new_string << file.rdbuf();
@@ -508,7 +525,7 @@ void Response::handlePOST()
 	}
 	else
 	{
-        CgiHandler cgiHandler(_client.getRequest());
+        CgiHandler cgiHandler(this->_client.getRequest(), this->_pollFds);
         std::string response = cgiHandler.postCgi(_client);
         _body = response;
         setStatus(200);
