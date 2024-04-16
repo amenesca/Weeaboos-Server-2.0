@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/13 20:52:19 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/16 14:18:21 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ bool	Response::MethodIsAllowed(int j)
 	return false;
 }
 
-std::string Response::CreatePath(const std::string& uri)
+std::string Response::CreatePath(const std::string& uri, int *locationPos)
 {
 	std::string path = "";
     std::string uri_without_query;
@@ -160,6 +160,7 @@ std::string Response::CreatePath(const std::string& uri)
 			std::cout << "Uri sem query: " << uri_without_query << std::endl;
 			if (serverLocations[j].getPath() == uri_without_query) 
 			{
+				*locationPos = j;
 				if (!MethodIsAllowed(j))
 				{
 					std::cout << "teste 1" << std::endl;
@@ -260,12 +261,21 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 
 std::string Response::readStaticFile(const std::string& path)
 {
-    std::ifstream file(path.c_str());
-    if (!file.is_open())
+	std::ifstream file;
+	if (path.find(".png"))
 	{
-        std::cerr << "Error opening file: " << path << std::endl;
-        return "";
-    }
+		file.open(path.c_str(), std::ios::binary);
+	}
+	else
+	{
+		file.open(path.c_str());
+	}
+	if (!file.is_open())
+	{
+		std::cerr << "Error opening file: " << path << std::endl;
+		return "";
+	}
+
 
     std::stringstream new_string;
     new_string << file.rdbuf();
@@ -317,10 +327,57 @@ int	cgiExists(const std::string& pathToCgi)
 	}
 }
 
+std::string	Response::buildAutoindexPage(std::string & path)
+{
+    std::string     delimeter;
+    std::string     page;
+    DIR             *dir;
+    struct dirent   *entry;
+
+    delimeter = "\r\n";
+	page.append("<!DOCTYPE html>").append(delimeter);
+    page.append("<html lang=\"pt-br\">").append(delimeter);
+    page.append("<head>").append(delimeter);
+    page.append("    <meta charset=\"UTF-8\">").append(delimeter);
+    page.append("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">").append(delimeter);
+	page.append("    <title>DefaultPage</title>").append(delimeter);
+    page.append("<body>").append(delimeter);
+    page.append("    <h1>Index of ").append(path).append("</h1>").append(delimeter);
+    page.append("    <ul>").append(delimeter);
+    dir = opendir(path.c_str());
+    if (dir != NULL)
+    {
+        while ((entry = readdir(dir)) != NULL)
+        {
+            std::string item = entry->d_name;
+            if (entry->d_type == DT_DIR)
+            {
+                page.append("            <li><a href=\"")\
+                .append(item).append("/\">").append(item)\
+                .append("/</a></li>").append(delimeter);
+            }
+            else
+			{
+                page.append("            <li><a href=\"")\
+                .append(item).append("\">").append(item)\
+                .append("/</a></li>").append(delimeter);
+			}
+		}
+        closedir(dir);
+    }
+    page.append("    </ul>").append(delimeter);
+    page.append("</body>").append(delimeter);
+    page.append("</html>").append(delimeter);
+    path.clear();
+    
+	return page;
+}
+
 void Response::handleGET()
 {
+	int locationPos = 0;
     std::string uri = _client.getRequest().getUri();
-	std::string path = CreatePath(uri);
+	std::string path = CreatePath(uri, &locationPos);
 	std::string errorPath;
 	
 	if (path == "ERRO405")
@@ -350,6 +407,19 @@ void Response::handleGET()
 	
 	if (path.empty() || !index.is_open()) 
 	{
+		if (!path.empty())
+		{
+			if (this->_client.getServerConfigs().getLocations()[locationPos].getAutoIndex() == true)
+			{
+				path = this->_client.getServerConfigs().getRoot() + this->_client.getServerConfigs().getLocations()[locationPos].getPath();
+				std::cout << "Path do autoindex: " << path << std::endl;
+				_body = buildAutoindexPage(path);
+				setStatus(200);
+				setHeader("200 OK", "text/html");
+				send();
+				return;
+			}
+		}
         errorPath = createErrorPath(404);
 		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
@@ -383,8 +453,9 @@ void Response::handleGET()
 
 void Response::handlePOST()
 {
+	int locationPos = 0;
     std::string bodyData = _client.getRequest().getNewRequestBody();
-    std::string path = CreatePath(this->_client.getRequest().getUri());
+    std::string path = CreatePath(this->_client.getRequest().getUri(), &locationPos);
 	std::string errorPath;
 	
 	if (path == "ERRO405")
@@ -448,7 +519,8 @@ void Response::handlePOST()
 
 void Response::handleDELETE()
 {
-	std::string path = CreatePath(_client.getRequest().getUri());
+	int	locationPos = 0;
+	std::string path = CreatePath(_client.getRequest().getUri(), &locationPos);
 	std::string errorPath;
 	
 	if (path == "ERRO405")

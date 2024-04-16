@@ -4,8 +4,9 @@
 # include "../Client/Client.hpp"
 # include "../RequestParser/RequestParser.hpp"
 # include <fstream>
-#include <sys/wait.h> 
-#include <sys/types.h>
+# include <sys/wait.h> 
+# include <sys/types.h>
+# include <dirent.h>
 
 class Response {
     private:
@@ -34,7 +35,8 @@ class Response {
         void        setStatus(int status);
 		std::string	setHeader(std::string status, std::string contentType);
 		std::string	toString(int number);
-		std::string CreatePath(const std::string& uri);
+		std::string buildAutoindexPage(std::string & path);
+		std::string CreatePath(const std::string& uri, int *locationPos);
 		std::string createErrorPath(int errorStatus);
 		std::string extractQueryString(const std::string& uri);
 		std::string	readData(const std::string& path, const std::string& query);
