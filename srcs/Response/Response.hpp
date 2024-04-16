@@ -7,20 +7,23 @@
 # include <sys/wait.h> 
 # include <sys/types.h>
 # include <dirent.h>
+# include <poll.h>
 
 class Response {
     private:
-		Client			_client;
-        int				_status;
-        std::string		_body;
-        std::string		_header;
-		std::string		_httpMessage;
-		CgiHandler		_cgiHandler;
-		ServerLog		_log;
-		RequestParser	_request;
+		Client				_client;
+        int					_status;
+        std::string			_body;
+        std::string			_header;
+		std::string			_httpMessage;
+		CgiHandler			_cgiHandler;
+		ServerLog			_log;
+		RequestParser		_request;
+		std::vector<pollfd>	*_pollFds; // resolvendo questão da poll
+
     public:
         Response();
-       	Response(const Client& client);
+       	Response(const Client& client, std::vector<pollfd> *pollfds);
         ~Response();
 		Response(const Response& copy);
 		Response&	operator=(const Response& copy);
@@ -46,6 +49,7 @@ class Response {
 		std::string deleteFile(const std::string& path);
 		bool		MethodIsAllowed(int j);
 		bool		fileExists(const std::string& path);
+		int			addFdToPoll(int i);
 
 
         void    send();
