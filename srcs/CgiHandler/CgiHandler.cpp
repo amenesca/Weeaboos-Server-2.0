@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/16 16:50:03 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:15:37 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,7 @@ CgiHandler::CgiHandler() :
 	_request_pipe(),
 	_request(),
 	_client(),
-	_log(),
-	_pollFds()
+	_log()
 {
 	_env = std::vector<char*>();
 	_pid = 0;
@@ -27,14 +26,13 @@ CgiHandler::CgiHandler() :
 	_request_pipe[1] = 0;
 }
 
-CgiHandler::CgiHandler(RequestParser request, std::vector<pollfd>* pollFds) :
+CgiHandler::CgiHandler(RequestParser request) :
 	_pid(0),
 	_env(),
 	_request_pipe(),
 	_request(request),
 	_client(),
-	_log(),
-	_pollFds(pollFds)
+	_log()
 {
 
 }
@@ -58,7 +56,6 @@ CgiHandler& CgiHandler::operator=(const CgiHandler& src)
 		this->_log = src.getLog();
 		this->_start_time = src._start_time;
 		this->_active = src._active;
-		this->_pollFds = src._pollFds;
 	}
 	return *this;
 }
@@ -160,9 +157,6 @@ std::string UriWithoutQuery(const std::string& uri)
 std::string CgiHandler::postCgi(Client client)
 {
 	int response_pipe[2];
-	int responsePipePos[2];
-	int requestPipePos[2];
-	
 	std::vector<char*> headerEnv = createEnv(_request.getHeaders(), client);
 
 	if (pipe(response_pipe) == -1)
@@ -177,12 +171,8 @@ std::string CgiHandler::postCgi(Client client)
     }
 
 	antiBlock(_request_pipe, response_pipe);
-	requestPipePos[0] = addFdToPoll(_request_pipe[0]);
-	requestPipePos[1] = addFdToPoll(_request_pipe[1]);
-	responsePipePos[0] = addFdToPoll(response_pipe[0]);
-	responsePipePos[1] = addFdToPoll(response_pipe[1]);
 	
-	if (!writePipes(_request.getNewRequestBody(), requestPipePos)) {
+	if (!writePipes(_request.getNewRequestBody())) {
         return ("");
 	}
 
@@ -229,8 +219,7 @@ std::string CgiHandler::postCgi(Client client)
   			std::cerr << "Error on close: " << strerror(errno) << std::endl;
   			exit(1);
 		}
-		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1)
-		{
+		if (execve(path.c_str(), argv.data(), headerEnv.data()) == -1) {
 			std::cerr << "Error on execve: " << strerror(errno) << std::endl;
 			exit(1);
 		}
@@ -242,21 +231,20 @@ std::string CgiHandler::postCgi(Client client)
 		close(response_pipe[1]);
 		char buffer[4096];
 		std::string responseBody;
-		ssize_t bytesRead = 1;
-		while ((bytesRead = read((*this->_pollFds)[responsePipePos[0]].fd, buffer, sizeof(buffer))) > 0) {
+		ssize_t bytesRead;
+		while ((bytesRead = read(response_pipe[0], buffer, sizeof(buffer))) > 0) {
 			responseBody.append(buffer, bytesRead);
 			memset(buffer, 0, sizeof(buffer));
 		}
 		if (bytesRead == -1) {
-			std::cerr << "Error reading from pipe: " << strerror(errno) << std::endl;
+			std::cerr << "Error reading from pipe: " << std::endl;
 			exit(1);
+		} else if (bytesRead == 0)
+		{
+			std::cerr << "Error Bytes read equal 0 " << std::endl;
 		}
 		close(_request_pipe[1]);
 		close(response_pipe[0]);
-		this->_pollFds->erase(this->_pollFds->begin() + requestPipePos[0]);
-		this->_pollFds->erase(this->_pollFds->begin() + requestPipePos[1]);
-		this->_pollFds->erase(this->_pollFds->begin() + responsePipePos[0]);
-		this->_pollFds->erase(this->_pollFds->begin() + responsePipePos[1]);
 		return (responseBody);
 	}
 	return ("");
@@ -278,78 +266,20 @@ void CgiHandler::antiBlock(int *pipe1, int *pipe2)
 	}
 }
 
-int CgiHandler::addFdToPoll(int fd)
+bool        CgiHandler::writePipes(std::string message)
 {
-	pollfd newPollFd;
-	std::cout << "Adding new fd number: " << fd << " to poll" << std::endl;
-	newPollFd.fd = fd;
-	newPollFd.events = POLLIN | POLLOUT;
-	newPollFd.revents = 0;
-	this->_pollFds->push_back(newPollFd);
-
-	return (this->_pollFds->size() - 1);
-}
-
-bool        CgiHandler::writePipes(std::string message, int requestPipePos[])
-{
-	// requestPipe
     size_t  bytesWritten;
     ssize_t bytes;
     bytesWritten = 0;
-	
-	while (bytesWritten < message.length())
-	{
-		bytes = write((*this->_pollFds)[requestPipePos[1]].fd,\
-			message.c_str() + bytesWritten, \
-			message.length() - bytesWritten);
-		if (bytes == -1)
-		{
-			return (false);
-		}
-		bytesWritten += bytes;
-	}
-    return (true);
-}
-
-int	CgiHandler::readPipes(int fd)
-{
-    char    buffer[BUFFER_SIZE_CGI];
-    int     bytesRead;
-
-    bytesRead = read(fd, buffer, sizeof(buffer));
-    if (bytesRead > 0)
+    while (bytesWritten < message.length())
     {
-        this->_response.append(buffer, bytesRead);
-        return (bytesRead);
-    }
-    else
-    {
-        return (0);
-    }
-}
-
-bool CgiHandler::checkAvailability(int fd)
-{
-    time_t startTime = time(NULL);
-    time_t currentTime;
-    int bytes;
-
-    while (this->_active)
-    {
-        currentTime = time(NULL);
-        if (difftime(currentTime, startTime) >= TIME_LIMIT)
+        bytes = write(this->_request_pipe[1], message.c_str() + bytesWritten, \
+                    message.length() - bytesWritten);
+        if (bytes == -1 || bytes == 0)
         {
-            kill(this->_pid, SIGKILL);
-            this->_active = false;
             return (false);
         }
-        bytes = readPipes(fd);
-        if (bytes > 0)
-        {
-            this->_active = false;
-            return true;
-        }
-		usleep(10000);
+        bytesWritten += bytes;
     }
     return (true);
 }
