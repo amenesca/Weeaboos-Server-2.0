@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/19 11:47:50 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:31:00 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,9 @@
 class WebServer
 {
 	private:
-		std::vector<VirtualServer>	_vServers; // serve para tacar na poll
-		std::vector<Client>			_Clients; // tem que receber as configs
-		std::vector<pollfd>			_pollFds; // primeiras posições sempre do server
+		std::vector<VirtualServer>	_vServers;
+		std::vector<Client>			_Clients;
+		std::vector<pollfd>			_pollFds;
 		int							_nbrServers;
 
 	public:

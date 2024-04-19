@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:30:01 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/28 16:20:45 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:29:56 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class Client
         int					_clientSocket;
         struct sockaddr_in	_client_addr;
         socklen_t			_client_addr_len;
-        std::string			_requestBuffer; // inutilizado
+        std::string			_requestBuffer;
         ssize_t				_bytesRead;
 		bool				_requestRead;
 		bool				_firstTimeRequest;

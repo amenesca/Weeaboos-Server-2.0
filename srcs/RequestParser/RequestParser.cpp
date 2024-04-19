@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:11:42 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/28 16:54:39 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:27:01 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,23 +75,17 @@ RequestParser& RequestParser::operator=(const RequestParser& copy)
 
 void RequestParser::parse(std::string request)
 {
-    // Declaring variables
-//	std::cout << "--- PARSER DA REQUEST ---" << std::endl;
-	
     std::string requestLine, headerLine, bodyLine;
     std::istringstream requestStream(request);
 
-    // Solicitation Line parsing
     std::getline(requestStream, requestLine);
     std::istringstream requestLineStream(requestLine);
     requestLineStream >> this->_requestMethod >> this->_uri >> this->_httpVersion;
 
-    // Header parsing
     while(std::getline(requestStream, headerLine) && headerLine != "\r\n\r\n")
 	{
 		if (headerLine == "\r")
 		{
-			std::cout << "Entrou aqui deu certo!" << std::endl;
 			break;
 		}
 
@@ -99,9 +93,8 @@ void RequestParser::parse(std::string request)
         if (separator != std::string::npos)
 		{
             std::string key = headerLine.substr(0, separator);
-            std::string value = headerLine.substr(separator + 2); // + 2 para ignorar ": "
+            std::string value = headerLine.substr(separator + 2);
 
-            // Se a chave for "Host", extrair apenas o conteúdo antes do ":"
             if (key == "Host")
 			{
                 size_t portSeparator = value.find(":");
@@ -118,12 +111,10 @@ void RequestParser::parse(std::string request)
             this->_requestHeaders[key] = value;
 			if (headerLine.find("Sec-Fetch-User: ?1") != std::string::npos)
 			{
-				std::cout << "Condição funcionou" << std::endl;
 				break;
 			}
         }
     }
-    // Body parsing
 	if (_requestMethod == "POST")
 	{
 		this->_contentLenght = std::atoi(this->_requestHeaders["Content-Length"].c_str());
@@ -132,12 +123,9 @@ void RequestParser::parse(std::string request)
 }
 
 void RequestParser::startBody(ssize_t bytesReceived, ssize_t bodyPosition,const u_int8_t* buffer) {
-    // Verificar se a posição do corpo está dentro dos limites do buffer
     if (bodyPosition >= 0 && bodyPosition < bytesReceived) {
-        // Calcular o tamanho do corpo (bytes restantes após a posição do corpo)
         ssize_t totalBytesToAdd = bytesReceived - bodyPosition;
 
-        // Adicionar o corpo à requisição usando o método append
         this->_newRequestBody.append(reinterpret_cast<const char*>(buffer + bodyPosition), totalBytesToAdd);
     }
 }
@@ -149,19 +137,17 @@ void RequestParser::appendBody(const u_int8_t* buffer, ssize_t bytesReceived)
 
 int RequestParser::_validateUri()
 {
-    // Verificar se a URI começa com uma barra "/"
     if (_uri.empty() || _uri[0] != '/')
 	{
-        return -1; // Deu merda
+        return -1;
     }
 
-    // Verificar se os caracteres da URI são válidos
     for (std::size_t i = 1; i < _uri.length(); ++i)
 	{
         char ch = _uri[i];
 
         if (!std::isalnum(ch) && ch != '/' && ch != '_' && ch != '-') {
-            return -1; // Deu merda    
+            return -1;
         }
     }
 

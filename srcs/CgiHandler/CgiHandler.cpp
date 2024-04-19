@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CgiHandler.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/05 00:37:17 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/19 13:15:37 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:36:06 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -241,7 +241,9 @@ std::string CgiHandler::postCgi(Client client)
 			exit(1);
 		} else if (bytesRead == 0)
 		{
-			std::cerr << "Error Bytes read equal 0 " << std::endl;
+			close(_request_pipe[1]);
+			close(response_pipe[0]);
+			return (responseBody);
 		}
 		close(_request_pipe[1]);
 		close(response_pipe[0]);

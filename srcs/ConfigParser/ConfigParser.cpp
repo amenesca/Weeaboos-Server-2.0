@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ConfigParser.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:21 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/16 14:01:23 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:25:57 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ std::vector<std::string> ConfigParser::split(const std::string& input) const
 
 	if (tokens.size() <= 1)
 	{
-		std::cout << "Split" << std::endl;
 		throw InvalidArguments();
 	}
     return tokens;
@@ -124,12 +123,10 @@ std::vector<int> ConfigParser::StrVecToIntVecPort(const std::vector<std::string>
         long intValue = std::strtol((*it).c_str(), &endPtr, 10);
 
         if (*endPtr != '\0' || endPtr == (*it).c_str()) {
-			std::cout << "strVVecToIntPort" << std::endl;
             throw InvalidArguments();
         }
 		else if (intValue < 0 || intValue > 65535)
 		{
-			std::cout << "strVVecToIntPort" << std::endl;
             throw InvalidArguments();
         }
 		else
@@ -175,7 +172,6 @@ bool	ConfigParser::isHostValid(std::string & _parameter) const
 	i = 0;
 	if ((_parameter.size() > 15) || (_parameter.size() < 7))
 	{
-		std::cout << "hostValid" << std::endl;
 		throw InvalidArguments();
 	}
 	while (i < _parameter.size())
@@ -186,21 +182,18 @@ bool	ConfigParser::isHostValid(std::string & _parameter) const
 		{
 			if (!std::isdigit(_parameter[(i + j)]))
 			{
-				std::cout << "hostValid" << std::endl;
 				throw InvalidArguments();
 			}
 			j++;
 		}
 		if ((_parameter[(i + j)] != '.') && ((i + j) < _parameter.size()))
 		{
-			std::cout << "hostValid" << std::endl;
 			throw InvalidArguments();
 		
 		}
 		nbr = atoi(_parameter.substr(i, j));
 		if ((nbr > 255) || (nbr < 0))
 		{
-			std::cout << "hostValid" << std::endl;
 			throw InvalidArguments();
 		}
 		i += (j + 1);
@@ -218,7 +211,6 @@ in_addr_t	ConfigParser::treatHost(std::string buff) const
 	{
 		return inet_addr(buff.c_str());
 	}
-	std::cout << "treatHoast" << std::endl;
 	throw InvalidArguments();
 	return (INADDR_NONE);
 }
@@ -230,13 +222,10 @@ int	ConfigParser::treatMaxBodySize(const std::string& strMaxBodySize) const
 
 	if (*endPtr != '\0' || endPtr == strMaxBodySize.c_str())
 	{
-		std::cout << "treatMaxBodySize" << std::endl;
-
 		throw InvalidArguments();
 	}
 	else if (intValue <= 0)
 	{
-		std::cout << "treatMaxBodySize" << std::endl;
 		throw InvalidArguments();
 	}
 	
@@ -255,7 +244,6 @@ bool ConfigParser::treatAutoIndex(const std::string& _argument) const
 	}
 	else
 	{
-		std::cout << "treatAutoIndex" << std::endl;
 		throw InvalidArguments();
 	}
 	return false;

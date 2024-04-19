@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/19 13:11:49 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:33:07 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,6 @@ bool	Response::MethodIsAllowed(int j)
 	{
 		if (AllowedMethods[i] == currentMethod)
 		{
-			std::cout << "Entered here" << std::endl;
 			return true;
 			break;
 		}
@@ -159,18 +158,14 @@ std::string Response::CreatePath(const std::string& uri, int *locationPos)
 		std::vector<Location> serverLocations = this->_client.getServerConfigs().getLocations();
 		for (size_t j = 0; j < serverLocations.size(); j++) 
 		{
-			std::cout << "Path da location: " << serverLocations[j].getPath() << std::endl;
-			std::cout << "Uri sem query: " << uri_without_query << std::endl;
 			if (serverLocations[j].getPath() == uri_without_query) 
 			{
 				*locationPos = j;
 				if (!MethodIsAllowed(j))
 				{
-					std::cout << "teste 1" << std::endl;
 					return "ERRO405";
 				}
 				path = _client.getServerConfigs().getRoot() + "/" + serverLocations[j].getIndex()[1];
-				std::cout << "PATH FORMADO: " << path << std::endl;
 				break;
 			}
 		}
@@ -214,27 +209,11 @@ bool Response::isCGIScript(const std::string& path)
     return (access(path.c_str(), X_OK) == 0);
 }
 
-int	Response::addFdToPoll(int fd)
-{
-	pollfd newPollFd;
-	std::cout << "Adding new fd number: " << fd << " to poll" << std::endl;
-	fcntl(fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC);
-	newPollFd.fd = fd;
-	newPollFd.events = POLLIN | POLLOUT;
-	newPollFd.revents = 0;
-	this->_pollFds->push_back(newPollFd);
-
-	return (this->_pollFds->size() - 1);
-}
-
 std::string Response::executeCGI(const std::string& path, const std::string& queryString)
 {
     int pipefd[2];
-	// int pollPos[2];
     pipe(pipefd);
-	
-	// pollPos[0] = addFdToPoll(pipefd[0]);
-	// pollPos[1] = addFdToPoll(pipefd[1]);
+
     pid_t pid = fork();
 
     if (pid == -1)
@@ -330,7 +309,6 @@ std::string Response::createErrorPath(int errorStatus)
 	if (errorStatus == 403)
 	{
 		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[6];
-		
 	}
 	return path;
 }
@@ -403,7 +381,6 @@ void Response::handleGET()
 	if (path == "ERRO405")
 	{
 		errorPath = createErrorPath(405);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(405);
         setHeader("405 Method Not Allowed", "text/html");
@@ -413,7 +390,6 @@ void Response::handleGET()
 	if (path == "ERRO403")
 	{
 		errorPath = createErrorPath(403);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(403);
         setHeader("403 Forbidden", "text/html");
@@ -432,7 +408,6 @@ void Response::handleGET()
 			if (this->_client.getServerConfigs().getLocations()[locationPos].getAutoIndex() == true)
 			{
 				path = this->_client.getServerConfigs().getRoot() + this->_client.getServerConfigs().getLocations()[locationPos].getPath();
-				std::cout << "Path do autoindex: " << path << std::endl;
 				_body = buildAutoindexPage(path);
 				setStatus(200);
 				setHeader("200 OK", "text/html");
@@ -441,7 +416,6 @@ void Response::handleGET()
 			}
 		}
         errorPath = createErrorPath(404);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(404);
         setHeader("404 Not Found", "text/html");
@@ -481,7 +455,6 @@ void Response::handlePOST()
 	if (path == "ERRO405")
 	{
 		errorPath = createErrorPath(405);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(405);
         setHeader("405 Method Not Allowed", "text/html");
@@ -515,11 +488,7 @@ void Response::handlePOST()
     }
 	else if (static_cast<int>(bodyData.size()) > _client.getServerConfigs().getMaxBodySize())
 	{
-		std::cout << "Body Size: " << static_cast<int>(bodyData.size()) << std::endl;
-		std::cout << "Max Body Size: " <<_client.getServerConfigs().getMaxBodySize() << std::endl;
-		
 		errorPath = createErrorPath(413);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(413);
         setHeader("413 Request Entity Too Large", "text/html");
@@ -546,7 +515,6 @@ void Response::handleDELETE()
 	if (path == "ERRO405")
 	{
 		errorPath = createErrorPath(405);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(405);
         setHeader("405 Method Not Allowed", "text/html");
@@ -556,7 +524,6 @@ void Response::handleDELETE()
 	if (path == "ERRO403")
 	{
 		errorPath = createErrorPath(403);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(403);
         setHeader("403 Forbidden", "text/html");
@@ -567,7 +534,6 @@ void Response::handleDELETE()
 	if (!fileExists(path))
 	{
 		errorPath = createErrorPath(404);
-		std::cout << "Error Path: " << errorPath << std::endl;
 		_body = readStaticFile(errorPath);
         setStatus(404);
         setHeader("404 Not Found", "text/html");
