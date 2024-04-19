@@ -6,7 +6,7 @@
 /*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/16 16:12:16 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:11:49 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -230,11 +230,11 @@ int	Response::addFdToPoll(int fd)
 std::string Response::executeCGI(const std::string& path, const std::string& queryString)
 {
     int pipefd[2];
-	int pollPos[2];
+	// int pollPos[2];
     pipe(pipefd);
 	
-	pollPos[0] = addFdToPoll(pipefd[0]);
-	pollPos[1] = addFdToPoll(pipefd[1]);
+	// pollPos[0] = addFdToPoll(pipefd[0]);
+	// pollPos[1] = addFdToPoll(pipefd[1]);
     pid_t pid = fork();
 
     if (pid == -1)
@@ -254,7 +254,7 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 			exit(1);
 		}
 		close(pipefd[0]);
-        dup2((*this->_pollFds)[pollPos[1]].fd, STDOUT_FILENO);
+        dup2(pipefd[1], STDOUT_FILENO);
         close(pipefd[1]);
         if (execve(path.c_str(), args.data(), NULL) == -1) {
             std::cerr << "Failed to execute CGI script" << std::endl;
@@ -270,14 +270,17 @@ std::string Response::executeCGI(const std::string& path, const std::string& que
 		char buffer[4096];
 		ssize_t bytesRead;
 
-		while ((bytesRead = read((*this->_pollFds)[pollPos[0]].fd, buffer, sizeof(buffer))) > 0)
+		while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0)
 		{
 			new_string.write(buffer, bytesRead);
+			if (bytesRead == 0 || bytesRead == -1)
+			{
+				close(pipefd[0]);
+    			return "";
+			}
 		}
 
-		close(pipefd[0]);      
-		this->_pollFds->erase(this->_pollFds->begin() + pollPos[0]);
-		this->_pollFds->erase(this->_pollFds->begin() + pollPos[1]);
+		close(pipefd[0]);
 		return new_string.str();
     }
     return "";
@@ -525,7 +528,7 @@ void Response::handlePOST()
 	}
 	else
 	{
-        CgiHandler cgiHandler(this->_client.getRequest(), this->_pollFds);
+        CgiHandler cgiHandler(this->_client.getRequest());
         std::string response = cgiHandler.postCgi(_client);
         _body = response;
         setStatus(200);

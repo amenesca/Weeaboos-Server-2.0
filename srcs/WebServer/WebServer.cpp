@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/19 11:49:45 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 12:57:08 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,26 +176,21 @@ void	WebServer::StartServer(void)
 		}
 
 		// Verificar se tem entrada nos clientes, se existir
-		for (size_t i = 0; i < this->_Clients.size(); i++)
+		for (size_t j = this->_nbrServers; j < this->_pollFds.size(); j++)
 		{
-			int pollPos = this->_Clients[i].getPollPos();
-			// fazer uma variável do numero de clientes conectados
-			// usar isso para fazer a iteração
-			// usar o pollPos de cada cliente para monitorar
-			if (_pollFds[pollPos].revents & POLLIN)
+			if (_pollFds[j].revents & POLLIN)
 			{
-				if (treatRequest(i, pollPos) == -1)
-					i--;
+				if (treatRequest(j - this->_nbrServers, j) == -1)
+					j--;
 			}
-			else if (_pollFds[pollPos].revents & POLLOUT)
+			else if (_pollFds[j].revents & POLLOUT)
 			{
-				if (treatResponse(i, pollPos) == -1)
-					i--;
+				if (treatResponse(j - this->_nbrServers, j) == -1)
+					j--;
 			}
-			else if(isPollError(pollPos))
+			else if(isPollError(j))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
-				WebServer::_serverRunning = false;
 			}
 		}
 		signal(SIGINT, &WebServer::signal_handler);
@@ -270,6 +265,7 @@ short int	WebServer::treatRequest(int clientPos, int pollPos)
 
 short int	WebServer::treatResponse(int clientPos, int pollPos)
 {
+	int checkError; 
 	if (_Clients[clientPos].getRequestRead())
 	{
 //		std::cout << "ENTROU AQUI" << std::endl;
@@ -281,7 +277,15 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 
 		//std::cout << response << std::endl;
 
-		send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
+		checkError = send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
+		if (checkError == 0 || checkError == -1)
+		{
+			std::cerr << "Error on send" << std::endl;
+			close(this->_Clients[clientPos].getClientSocket());
+			this->_pollFds.erase(this->_pollFds.begin() + pollPos);
+			this->_Clients.erase(this->_Clients.begin() + clientPos);
+			return -1;
+		}
 
 		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
 		std::cout << "CLOSE CONNECTION da Response" << std::endl;
