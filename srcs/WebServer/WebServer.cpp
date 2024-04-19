@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/16 15:21:50 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 11:49:45 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,8 @@ void	WebServer::setClients(const std::vector<Client>& clients)
 	this->_Clients = clients;
 }
 
+bool	WebServer::_serverRunning = true;
+
 void	WebServer::addVServersSockToPoll(void)
 {
 	std::cout << "Adding vservers sockets to poll." << std::endl;
@@ -131,6 +133,10 @@ void	WebServer::closeConnection(int index)
 	this->_pollFds.erase(this->_pollFds.begin() + index);
 }
 
+void WebServer::signal_handler(int /*signal*/) {
+	WebServer::_serverRunning = false;
+}
+
 void	WebServer::closeAllConnections(void)
 {
 	size_t	i;
@@ -148,9 +154,8 @@ void	WebServer::closeAllConnections(void)
 void	WebServer::StartServer(void)
 {
 	this->addVServersSockToPoll();
-	bool serverRunning = true;
 
-	while (serverRunning)
+	while (WebServer::_serverRunning)
 	{
 		if (!verifyPollStatus())
 			return ;
@@ -190,10 +195,12 @@ void	WebServer::StartServer(void)
 			else if(isPollError(pollPos))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
-				serverRunning = false;
+				WebServer::_serverRunning = false;
 			}
 		}
+		signal(SIGINT, &WebServer::signal_handler);
 	}
+	this->closeAllConnections();
 }
 
 bool	WebServer::verifyPollStatus(void)
