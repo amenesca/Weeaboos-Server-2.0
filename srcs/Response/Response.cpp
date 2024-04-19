@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/22 15:30:46 by femarque          #+#    #+#             */
-/*   Updated: 2024/04/19 13:33:07 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:52:44 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -285,30 +285,36 @@ std::string Response::readStaticFile(const std::string& path)
 
 std::string Response::createErrorPath(int errorStatus)
 {
-	std::string path;
-	if (errorStatus == 404)
-	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[2];
-	}
+	std::string path = "";
 	if (errorStatus == 400)
 	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[1];
-	}
-	if (errorStatus == 405)
-	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[3];
-	}
-	if (errorStatus == 413)
-	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[4];
-	}
-	if (errorStatus == 500)
-	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[5];
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 2)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[1];
 	}
 	if (errorStatus == 403)
 	{
-		path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[6];
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 3)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[2];
+	}
+	if (errorStatus == 404)
+	{
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 4)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[3];
+	}
+	if (errorStatus == 405)
+	{
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 5)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[4];
+	}
+	if (errorStatus == 413)
+	{
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 6)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[5];
+	}
+	if (errorStatus == 500)
+	{
+		if (this->_client.getServerConfigs().getErrorPage().size() >= 7)
+			path = this->_client.getServerConfigs().getRoot() + "/" + this->_client.getServerConfigs().getErrorPage()[6];
 	}
 	return path;
 }

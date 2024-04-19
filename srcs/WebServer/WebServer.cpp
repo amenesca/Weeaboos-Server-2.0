@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
+/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/19 13:32:08 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:45:01 by amenesca         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,6 @@ bool	WebServer::verifyPollStatus(void)
 
 	if (status == -1)
 	{
-		std::cerr << "Error in poll." << std::endl;
 		this->closeAllConnections();
 		return (false);
 	}
