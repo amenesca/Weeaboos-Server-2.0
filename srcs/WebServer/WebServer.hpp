@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:06 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 15:16:54 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 11:47:50 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class WebServer
 		void	addNewClientSockToPoll(int clientSocket);
 		void	closeConnection(int index);
 		void	closeAllConnections(void);
+		static void	signal_handler(int signal);
 		
 		void		StartServer(void);
 		bool		isPollError(int i);
@@ -55,6 +56,6 @@ class WebServer
 		void		openNewConnection(int i);
 		short int	treatRequest(int clientPos, int pollPos);
 		short int	treatResponse(int clientPos, int pollPos);
-
+		static bool					_serverRunning;
 		
 };
