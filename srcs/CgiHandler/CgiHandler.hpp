@@ -4,7 +4,7 @@
 # include "../ServerLog/ServerLog.hpp"
 # include <ctime>
 # include <signal.h>
-#include <sys/wait.h> // Para a função waitpid
+#include <sys/wait.h>
 #include <sys/types.h>
 
 #define BUFFER_SIZE_CGI 64 * 1024
@@ -41,7 +41,6 @@ class CgiHandler {
         Client              getClient() const;
         
         std::vector<char*>  createEnv(std::map<std::string, std::string> requestHeaders, Client client);
-        //int                 getCgi(Client client);
         std::string         postCgi(Client client);
 		std::string         getScriptFilename(const std::string& requestURI);
 };

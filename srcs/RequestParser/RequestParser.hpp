@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   RequestParser.hpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 17:03:49 by amenesca          #+#    #+#             */
-/*   Updated: 2024/03/26 21:47:18 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:30:19 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,27 +34,23 @@ class RequestParser
 		std::string							_newRequestBody;
 		std::map<std::string, std::string>	_requestHeaders;
 
-		std::string							_stringBuffer; // inutilizado
+		std::string							_stringBuffer;
 		int									_contentLenght;
 
-	// Private Methods
 		int _validateUri();
 	public:
-	// Constructors
 		RequestParser();
 		~RequestParser();
 		RequestParser(std::string request);
 		RequestParser(const RequestParser& copy);
 		RequestParser& operator=(const RequestParser& copy);
 
-	// Class Methods
 		void	parse(std::string request);
 		void 	parse(void);
 		void	validateRequestLine();
 		void	startBody(ssize_t bytesReceived, ssize_t bodyPosition,const u_int8_t *buffer);
 		void 	appendBody(const u_int8_t* buffer, ssize_t bytesReceived);
 	
-	// Getters
 		std::string 						getMethod() const ;
 		std::string 						getUri() const;
 		std::string							getHttpVersion() const;
@@ -67,7 +63,6 @@ class RequestParser
 
 		void setContentLenght(const int& contentLenght);
 
-	// Exceptions
 		class invalidMethod : public std::exception {
 		public:
 			virtual const char* what() const throw();

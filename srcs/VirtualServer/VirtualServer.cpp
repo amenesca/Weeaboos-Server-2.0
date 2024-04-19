@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   VirtualServer.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:18 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/03 15:17:53 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:30:44 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -257,14 +257,11 @@ void					VirtualServer::closeCon(void)
 }
 
 bool VirtualServer::isDescriptorOpen(int fd) const {
-    // Tenta associar um fluxo de arquivo ao descritor de arquivo fornecido
     FILE *file = fdopen(fd, "r");
     if (file) {
-        // Se a associação for bem-sucedida, o descritor de arquivo está aberto
         fclose(file);
         return true;
     } else {
-        // Se a associação falhar, o descritor de arquivo não está aberto
         return false;
     }
 }

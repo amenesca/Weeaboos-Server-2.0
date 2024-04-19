@@ -19,7 +19,7 @@ class Response {
 		CgiHandler			_cgiHandler;
 		ServerLog			_log;
 		RequestParser		_request;
-		std::vector<pollfd>	*_pollFds; // resolvendo questão da poll
+		std::vector<pollfd>	*_pollFds;
 
     public:
         Response();

@@ -6,7 +6,7 @@
 /*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/14 14:48:13 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/19 11:26:38 by femarque         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:29:05 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,11 @@ int main(int argc, char **argv)
 		{
 			settingVServers.setConfigFilePath(argv[1]);
 			settingVServers.initConfig();
-			vServers = settingVServers.getVServers(); // VServers Copiados para a main
-			// Agora devo começar a conexão de sockets
+			vServers = settingVServers.getVServers();
 		} else if (argc == 1) {
 			settingVServers.setConfigFilePath("./conf/default.conf");
 			settingVServers.initConfig();
-			vServers = settingVServers.getVServers(); // VServers Copiados para a main
-			// Agora devo começar a conexão de sockets
+			vServers = settingVServers.getVServers();
 		} else {
 			std::cerr << "webserver: error: Invalid arguments." << std::endl;
 			return -1;	

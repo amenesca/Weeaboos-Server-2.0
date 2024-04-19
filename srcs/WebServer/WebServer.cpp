@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/20 10:32:08 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/19 12:57:08 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:32:08 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,6 @@ bool	WebServer::_serverRunning = true;
 
 void	WebServer::addVServersSockToPoll(void)
 {
-	std::cout << "Adding vservers sockets to poll." << std::endl;
 	for (int i = 0; i < _nbrServers; i++)
 	{
 		addNewSocketToPoll(this->_vServers[i].getFdSocket());
@@ -109,7 +108,6 @@ void	WebServer::addVServersSockToPoll(void)
 void	WebServer::addNewSocketToPoll(int socketFd)
 {
 	pollfd newPollFd;
-	std::cout << "Adding new socket number: " << socketFd << " to poll" << std::endl;
 	fcntl(socketFd, F_SETFL, O_NONBLOCK);
 	newPollFd.fd = socketFd;
 	newPollFd.events = POLLIN | POLLOUT;
@@ -121,19 +119,18 @@ void	WebServer::addNewSocketToPoll(int socketFd)
 
 void	WebServer::addNewClientSockToPoll(int clientSocket)
 {
-	std::cout << "Starting Connection with a new client." << std::endl;
 	this->addNewSocketToPoll(clientSocket);
 }
 
 void	WebServer::closeConnection(int index)
 {
-	std::cout << "Closing connection fd: " << this->_pollFds[index].fd \
-	<< std::endl;
 	close(this->_pollFds[index].fd);
 	this->_pollFds.erase(this->_pollFds.begin() + index);
 }
 
-void WebServer::signal_handler(int /*signal*/) {
+void WebServer::signal_handler(int signal) {
+	if (signal != SIGINT)
+		return ;
 	WebServer::_serverRunning = false;
 }
 
@@ -144,8 +141,6 @@ void	WebServer::closeAllConnections(void)
 	i = 0;
 	while (i < this->_pollFds.size())
 	{
-		std::cout << "Closing the connection: " << this->_pollFds[i].fd \
-		<< std::endl;
 		close(this->_pollFds[i++].fd);
 	}
 	this->_pollFds.clear();
@@ -160,22 +155,18 @@ void	WebServer::StartServer(void)
 		if (!verifyPollStatus())
 			return ;
 
-		 // Verificar se tem entrada no server
 		for (int i = 0; i < _nbrServers; i++)
 		{
 			if (_pollFds[i].revents & POLLIN)
 			{
-				std::cout << "New Connection on server: " << i << std::endl;
 				this->openNewConnection(i);
 			}
 			else if(isPollError(i))
 			{
 				std::cerr << "Error for poll revents" << std::endl;
-//				serverRunning = false;
 			}
 		}
 
-		// Verificar se tem entrada nos clientes, se existir
 		for (size_t j = this->_nbrServers; j < this->_pollFds.size(); j++)
 		{
 			if (_pollFds[j].revents & POLLIN)
@@ -229,8 +220,6 @@ void	WebServer::openNewConnection(int i)
 	newClientSocket = accept(this->_vServers[i].getFdSocket(),\
 		reinterpret_cast<struct sockaddr*>(newClient.getClientAddrPointer()),\
 		newClient.getClientAddrLenPointer());
-
-	std::cout << "Valor do novo Cliente Socket" << newClientSocket << std::endl;
 	
 	newClient.setClientSocket(newClientSocket);
 	newClient.setServerConfigs(this->_vServers[i]);
@@ -243,16 +232,12 @@ void	WebServer::openNewConnection(int i)
 short int	WebServer::treatRequest(int clientPos, int pollPos)
 {
 	short int errorOnRecv;
-	// checar se a request já foi lida totalmente;
 	if (!this->_Clients[clientPos].getRequestRead())
 	{
-		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
 		this->_Clients[clientPos].setStart_time(time(NULL));
 		errorOnRecv = this->_Clients[clientPos].receiveRequest(this->_pollFds[pollPos].fd);
 		if (!errorOnRecv)
 		{
-			std::cout << "Close Connection da Request" << std::endl;
-			std::cout << "Fechando socket numero: " << this->_Clients[clientPos].getClientSocket() << std::endl;
 			close(this->_Clients[clientPos].getClientSocket());
 			this->_pollFds.erase(this->_pollFds.begin() + pollPos);
 			this->_Clients.erase(this->_Clients.begin() + clientPos);
@@ -268,14 +253,10 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 	int checkError; 
 	if (_Clients[clientPos].getRequestRead())
 	{
-//		std::cout << "ENTROU AQUI" << std::endl;
-//	std::cout << "Imprimindo Content-Type: " << _Clients[clientPos].getRequest().getHeaders()["Content-Type"] << std::endl;
 		Response makeResponse(_Clients[clientPos], &this->_pollFds);
 		makeResponse.httpMethods();
 
 		std::string response = makeResponse.getHttpMessage();
-
-		//std::cout << response << std::endl;
 
 		checkError = send(_pollFds[pollPos].fd, response.c_str(), response.size(), 0);
 		if (checkError == 0 || checkError == -1)
@@ -286,10 +267,6 @@ short int	WebServer::treatResponse(int clientPos, int pollPos)
 			this->_Clients.erase(this->_Clients.begin() + clientPos);
 			return -1;
 		}
-
-		std::cout << "Request POS:\n" << "ClientPos " << clientPos << "\npollPos " << pollPos << std::endl;
-		std::cout << "CLOSE CONNECTION da Response" << std::endl;
-		std::cout << "Fechando socket numero: " << this->_Clients[clientPos].getClientSocket() << std::endl;
 		close(this->_Clients[clientPos].getClientSocket());
 		this->_pollFds.erase(this->_pollFds.begin() + pollPos);
 		this->_Clients.erase(this->_Clients.begin() + clientPos);

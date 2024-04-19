@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: amenesca <amenesca@student.42.rio>         +#+  +:+       +#+        */
+/*   By: femarque <femarque@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/21 14:33:07 by amenesca          #+#    #+#             */
-/*   Updated: 2024/04/04 16:06:12 by amenesca         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:29:48 by femarque         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,6 @@ Client::Client() :
 
 Client::~Client()
 {
-//	this->_clientSocket = -1;
 	this->_client_addr_len = 0;
 	memset(&this->_client_addr,0,sizeof(this->_client_addr));
 	_requestRead = false;
@@ -203,7 +202,7 @@ int Client::countBytesUntilCRLF(const u_int8_t* data, int dataSize) const
 	{
         if (data[i] == '\r' && data[i + 1] == '\n' && data[i + 2] == '\r' && data[i + 3] == '\n')
 		{
-            count += i + 4; // Incluir os bytes da sequência "\r\n\r\n"
+            count += i + 4;
             break;
         }
     }
@@ -223,11 +222,8 @@ short int	Client::receiveRequest(int client)
 		return false;
 	else if (bytes == 0)
 	{
-		std::cout << "Client disconnected" << std::endl;
 		return false;
 	}
-	
-	std::cout << buffer << "\nFim do buffer\n" << std::endl;
 	
 	if (this->_firstTimeRequest == true)
 	{
@@ -246,12 +242,10 @@ short int	Client::receiveRequest(int client)
 		headerBytes = countBytesUntilCRLF(buffer, bytes);
 		_totalBodyBytes += bytes - headerBytes;
 
-		// fazer função nova para fazer append da posição do fim dos headers(inicio do body) na string newRequestBody
-		this->_requestParser.startBody(bytes, headerBytes, buffer); //feito
+		this->_requestParser.startBody(bytes, headerBytes, buffer);
 
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
-//			std::cout << "NewBody:\n" << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
@@ -262,12 +256,9 @@ short int	Client::receiveRequest(int client)
 	{
 		this->_requestParser.appendBody(buffer, bytes);
 		this->_totalBodyBytes += bytes;
-//		std::cout << "Contagem total dos bytes: " << this->_totalBodyBytes << std::endl;
-//		std::cout << "Content Lenght requerido: " << this->_requestParser.getContentLenght() << std::endl;
 		
 		if (this->_totalBodyBytes == this->_requestParser.getContentLenght())
 		{
-//			std::cout << this->_requestParser.getNewRequestBody() << std::endl;
 			this->setRequestRead(true);
 			return true;
 		}
